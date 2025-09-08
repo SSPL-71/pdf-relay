@@ -195,6 +195,13 @@ button {
     <center><div class="canvas-container" id="canvasContainer"></div></center>
     <center><button id="mergeToPDF" onclick="mergeToPDF()">MERGE PDF</button></center>
 
+<div style="margin-top: 10px; margin-bottom: 10px;">
+  <label>
+    <input type="checkbox" id="autoUploadSinglePDF" />
+    Auto-upload single PDFs to Drive
+  </label>
+</div>
+
   <!-- GPS Camera JS -->
   <script>
         console.log("Page loaded and script running...");
@@ -353,12 +360,7 @@ function splitText(ctx, text, maxWidth) {
     return lines;
 }
 
-<div style="margin-top: 10px; margin-bottom: 10px;">
-  <label>
-    <input type="checkbox" id="autoUploadSinglePDF" />
-    Auto-upload single PDFs to Drive
-  </label>
-</div>
+
 
 function generatePDF(imageData, exifDate, count) {
     const { jsPDF } = window.jspdf;
