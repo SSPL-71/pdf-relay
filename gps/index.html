@@ -310,14 +310,6 @@ ctx.imageSmoothingQuality = "high";
     checkbox.value = imageCounter;
     checkbox.style.display = "inline";
 
-    // Create and configure checkbox
-const checkbox = document.createElement("input");
-checkbox.type = "checkbox";
-checkbox.classList.add("checkbox");
-checkbox.id = `checkbox_${imageCounter}`;
-checkbox.value = imageCounter;
-checkbox.style.display = "inline";
-
 // Add event listener for upload
 checkbox.addEventListener('change', function () {
     if (this.checked) {
