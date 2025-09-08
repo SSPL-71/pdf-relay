@@ -498,7 +498,7 @@ const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 
       console.log("📦 Base64 length:", base64Data.length);
 
-      fetch("http://localhost:3000/upload-pdf", {
+      fetch("/upload-pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
