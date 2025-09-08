@@ -353,6 +353,13 @@ function splitText(ctx, text, maxWidth) {
     return lines;
 }
 
+<div style="margin-top: 10px; margin-bottom: 10px;">
+  <label>
+    <input type="checkbox" id="autoUploadSinglePDF" />
+    Auto-upload single PDFs to Drive
+  </label>
+</div>
+
 function generatePDF(imageData, exifDate, count) {
     const { jsPDF } = window.jspdf;
 
@@ -387,6 +394,42 @@ function generatePDF(imageData, exifDate, count) {
         console.log(`PDF created for ${pdfFileName}`);
     };
 }
+
+// ✅ Upload to Drive if checkbox is checked
+        const autoUploadCheckbox = document.getElementById("autoUploadSinglePDF");
+        if (autoUploadCheckbox && autoUploadCheckbox.checked) {
+            blobToBase64(pdfBlob).then(base64Data => {
+                const selector = document.getElementById("caseSelector");
+                const selectedFolderId = selector.value;
+
+                if (!selectedFolderId) {
+                    alert("Please select a case before uploading.");
+                    return;
+                }
+
+                fetch("/upload-pdf", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        folderId: selectedFolderId,
+                        fileName: pdfFileName,
+                        base64: base64Data
+                    })
+                })
+                .then(res => res.text())
+                .then(result => {
+                    console.log("✅ Single PDF uploaded:", result);
+                    alert(`✅ ${pdfFileName} uploaded to Drive.`);
+                })
+                .catch(err => {
+                    console.error("❌ Upload failed:", err);
+                    alert("❌ Upload failed. Please try again.");
+                });
+            });
+        }
+    };
+}
+
 
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
