@@ -310,16 +310,57 @@ ctx.imageSmoothingQuality = "high";
     checkbox.value = imageCounter;
     checkbox.style.display = "inline";
 
-    checkbox.addEventListener('change', function () {
-        if (this.checked) {
-            console.log(`Image ${imageCounter} selected.`);
-        } else {
-            console.log(`Image ${imageCounter} deselected.`);
-        }
-    });
+    // Create and configure checkbox
+const checkbox = document.createElement("input");
+checkbox.type = "checkbox";
+checkbox.classList.add("checkbox");
+checkbox.id = `checkbox_${imageCounter}`;
+checkbox.value = imageCounter;
+checkbox.style.display = "inline";
 
-    canvasContainer.appendChild(checkbox);
-    canvasContainer.appendChild(downloadLink);
+// Add event listener for upload
+checkbox.addEventListener('change', function () {
+    if (this.checked) {
+        console.log(`Image ${imageCounter} selected.`);
+
+        // Convert image to Blob
+        const blob = dataURItoBlob(imageData);
+
+        // Convert Blob to base64 and upload
+        blobToBase64(blob).then(base64Data => {
+            const selector = document.getElementById("caseSelector");
+            const selectedFolderId = selector.value;
+
+            if (!selectedFolderId) {
+                alert("Please select a case before uploading.");
+                return;
+            }
+
+            fetch("/upload-pdf", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    folderId: selectedFolderId,
+                    fileName: fileName,
+                    base64: base64Data
+                })
+            })
+            .then(res => res.text())
+            .then(result => {
+                console.log("✅ Image uploaded:", result);
+                alert(`✅ ${fileName} uploaded to Drive.`);
+            })
+            .catch(err => {
+                console.error("❌ Upload failed:", err);
+                alert("❌ Upload failed. Please try again.");
+            });
+        });
+    }
+});
+
+// ✅ Append elements to canvasContainer outside the event listener
+canvasContainer.appendChild(checkbox);
+canvasContainer.appendChild(downloadLink);
 
     // Call PDF function
     generatePDF(imageData, exifDate, imageCounter);
