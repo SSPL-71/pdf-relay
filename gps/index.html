@@ -168,7 +168,7 @@ button {
 </div>
 
 <script>
-  fetch("http://localhost:3000/list-cases")
+  fetch("/list-cases")
     .then(res => res.json())
     .then(folders => {
       const selector = document.getElementById("caseSelector");
