@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Relay Test</title>
+</head>
+<body>
+  <h2>Test Relay Upload</h2>
+  <button onclick="sendTest()">Send Test Request</button>
+
+  <script>
+    function sendTest() {
+      const payload = {
+        folderId: "1j7Es3bBqlPBcPaxobJRF5a0hQv7nOfes",
+        fileName: "TestUpload.pdf",
+        base64: "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjEgMCBvYmoKPDwvTGluZWFyaXplZCAxL0wgNjQ0OC9PIDMvRSAxMjM0L04gMS9UIDYyNjQvSCBbIDM2MSAxMDZdPj4KZW5kb2JqCnhyZWYKMCA0CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxMCAwMDAwMCBuIAowMDAwMDAwMDIyIDAwMDAwIG4gCnRyYWlsZXIKPDwvUm9vdCAxIDAgUi9JRCBbPEYzRjY3QzYyQzY2QzY2QzY2QzY2QzY2QzY2QzY2Pl0+PgplbmRzdHJlYW0KZW5kb2ZmaWUK"
+      };
+
+      fetch("http://localhost:3000/upload-pdf", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.text())
+      .then(result => {
+        alert("Response: " + result);
+        console.log("Relay result:", result);
+      })
+      .catch(error => {
+        alert("Error: " + error);
+        console.error("Relay error:", error);
+      });
+    }
+  </script>
+</body>
+</html>
