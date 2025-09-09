@@ -212,18 +212,16 @@ button {
             console.log("Image selected:", file.name);
             const reader = new FileReader();
 	reader.onload = function (e) {
-  	const imageData = e.target.result;
-  	const uploadedImage = new Image();
-  	uploadedImage.src = imageData;
+  const imageData = e.target.result;
+  const uploadedImage = new Image();
+  uploadedImage.src = imageData;
 
   readEXIFGPS(file, function (exifDate) {
     drawImageWithOverlay(uploadedImage, exifDate);
   });
 };
-                uploadedImage.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
+
+reader.readAsDataURL(file);
 
         function readEXIFGPS(file, callback) {
             EXIF.getData(file, function () {
