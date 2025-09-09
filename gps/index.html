@@ -553,7 +553,8 @@ function uploadSingleImage() {
   const selected = uploadedImages.find(img => img.checkbox.checked);
   if (!selected) return;
 
-  const pdf = new jsPDF();
+  const { jsPDF } = window.jspdf;
+const pdf = new jsPDF();
   pdf.addImage(selected.imageData, "JPEG", 10, 10, 180, 160);
   const blob = pdf.output("blob");
 
@@ -590,7 +591,8 @@ function mergeSelectedImages() {
   const selectedImages = uploadedImages.filter(img => img.checkbox.checked);
   if (selectedImages.length < 2) return;
 
-  const pdf = new jsPDF();
+ const { jsPDF } = window.jspdf;
+const pdf = new jsPDF();
   selectedImages.forEach((img, index) => {
     pdf.addImage(img.imageData, "JPEG", 10, 10, 180, 160);
     if (index < selectedImages.length - 1) {
