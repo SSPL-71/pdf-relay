@@ -211,13 +211,15 @@ button {
 
             console.log("Image selected:", file.name);
             const reader = new FileReader();
-            reader.onload = function (e) {
-                let uploadedImage = new Image();
-                uploadedImage.onload = function () {
-                    readEXIFGPS(file, function (exifDate) {
-                        drawImageWithOverlay(uploadedImage, exifDate);
-                    });
-                };
+	reader.onload = function (e) {
+  	const imageData = e.target.result;
+  	const uploadedImage = new Image();
+  	uploadedImage.src = imageData;
+
+  readEXIFGPS(file, function (exifDate) {
+    drawImageWithOverlay(uploadedImage, exifDate);
+  });
+};
                 uploadedImage.src = e.target.result;
             };
             reader.readAsDataURL(file);
