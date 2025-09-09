@@ -550,83 +550,132 @@ const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 }
 
 function uploadSingleImage() {
+  console.log("🟢 uploadSingleImage triggered");
+
   const selected = uploadedImages.find(img => img.checkbox.checked);
   if (!selected) return;
 
   const { jsPDF } = window.jspdf;
-const pdf = new jsPDF();
-  pdf.addImage(selected.imageData, "JPEG", 10, 10, 180, 160);
-  const blob = pdf.output("blob");
+  const pdf = new jsPDF();
 
-  const selector = document.getElementById("caseSelector");
-  const folderId = selector.value;
-  if (!folderId) {
-    alert("Please select a case before uploading.");
-    return;
-  }
+  const img = new Image();
+  img.src = selected.imageData;
 
-  blobToBase64(blob).then(base64Data => {
-    fetch("/upload-pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        folderId: folderId,
-        fileName: selected.fileName.replace(".jpg", ".pdf"),
-        base64: base64Data
+  img.onload = function () {
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+    const imgWidth = img.width;
+    const imgHeight = img.height;
+
+    const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+    const scaledWidth = imgWidth * scale;
+    const scaledHeight = imgHeight * scale;
+
+    const x = (pageWidth - scaledWidth) / 2;
+    const y = (pageHeight - scaledHeight) / 2;
+
+    pdf.addImage(img, "JPEG", x, y, scaledWidth, scaledHeight);
+    const blob = pdf.output("blob");
+
+    const selector = document.getElementById("caseSelector");
+    const folderId = selector.value;
+    if (!folderId) {
+      alert("Please select a case before uploading.");
+      return;
+    }
+
+    blobToBase64(blob).then(base64Data => {
+      fetch("/upload-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folderId: folderId,
+          fileName: selected.fileName.replace(".jpg", ".pdf"),
+          base64: base64Data
+        })
       })
-    })
-    .then(res => res.text())
-    .then(result => {
-      console.log("✅ Single image uploaded:", result);
-      alert(`✅ ${selected.fileName} uploaded as PDF.`);
-    })
-    .catch(err => {
-      console.error("❌ Upload failed:", err);
-      alert("❌ Upload failed. Please try again.");
+      .then(res => res.text())
+      .then(result => {
+        console.log("✅ Single image uploaded:", result);
+        alert(`✅ ${selected.fileName} uploaded as PDF.`);
+      })
+      .catch(err => {
+        console.error("❌ Upload failed:", err);
+        alert("❌ Upload failed. Please try again.");
+      });
     });
-  });
+  };
 }
 
 function mergeSelectedImages() {
+  console.log("🟢 mergeSelectedImages triggered");
+
   const selectedImages = uploadedImages.filter(img => img.checkbox.checked);
   if (selectedImages.length < 2) return;
 
- const { jsPDF } = window.jspdf;
-const pdf = new jsPDF();
-  selectedImages.forEach((img, index) => {
-    pdf.addImage(img.imageData, "JPEG", 10, 10, 180, 160);
-    if (index < selectedImages.length - 1) {
-      pdf.addPage();
-    }
-  });
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF();
 
-  const blob = pdf.output("blob");
-  const selector = document.getElementById("caseSelector");
-  const folderId = selector.value;
-  if (!folderId) {
-    alert("Please select a case before uploading.");
-    return;
-  }
+  let loadCount = 0;
 
-  blobToBase64(blob).then(base64Data => {
-    fetch("/upload-pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        folderId: folderId,
-        fileName: "Merged_Images.pdf",
-        base64: base64Data
-      })
-    })
-    .then(res => res.text())
-    .then(result => {
-      console.log("✅ Merged PDF uploaded:", result);
-      alert("✅ Merged PDF uploaded to Drive.");
-    })
-    .catch(err => {
-      console.error("❌ Upload failed:", err);
-      alert("❌ Upload failed. Please try again.");
-    });
+  selectedImages.forEach((imgObj, index) => {
+    const img = new Image();
+    img.src = imgObj.imageData;
+
+    img.onload = function () {
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+
+      const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+      const scaledWidth = imgWidth * scale;
+      const scaledHeight = imgHeight * scale;
+
+      const x = (pageWidth - scaledWidth) / 2;
+      const y = (pageHeight - scaledHeight) / 2;
+
+      pdf.addImage(img, "JPEG", x, y, scaledWidth, scaledHeight);
+
+      if (index < selectedImages.length - 1) {
+        pdf.addPage();
+      }
+
+      loadCount++;
+      if (loadCount === selectedImages.length) {
+        const blob = pdf.output("blob");
+
+        const selector = document.getElementById("caseSelector");
+        const folderId = selector.value;
+        if (!folderId) {
+          alert("Please select a case before uploading.");
+          return;
+        }
+
+        blobToBase64(blob).then(base64Data => {
+          fetch("/upload-pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              folderId: folderId,
+              fileName: "Merged_Images.pdf",
+              base64: base64Data
+            })
+          })
+          .then(res => res.text())
+          .then(result => {
+            console.log("✅ Merged PDF uploaded:", result);
+            alert("✅ Merged PDF uploaded to Drive.");
+          })
+          .catch(err => {
+            console.error("❌ Upload failed:", err);
+            alert("❌ Upload failed. Please try again.");
+          });
+        });
+      }
+    };
   });
 }
 
