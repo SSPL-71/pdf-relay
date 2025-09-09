@@ -194,10 +194,9 @@ button {
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
     <center><div class="canvas-container" id="canvasContainer"></div></center>
 <center style="margin-top: 20px;">
-  <button id="uploadSingleBtn" style="display:none;">Convert to PDF and Upload to Drive</button>
-  <button id="mergeUploadBtn" style="display:none;">Convert, Merge and Upload to Drive</button>
-</center>
-    
+  <button id="uploadSingleBtn" style="display:none;" onclick="uploadSingleImage()">Convert to PDF and Upload to Drive</button>
+  <button id="mergeUploadBtn" style="display:none;" onclick="mergeSelectedImages()">Convert, Merge and Upload to Drive</button>
+</center>    
 
   <!-- GPS Camera JS -->
   <script>
