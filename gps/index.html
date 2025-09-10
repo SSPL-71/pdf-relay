@@ -14,7 +14,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-   
+ <script src="/access/login.js"></script>  
 </head>
 <body>
 <style> 
@@ -150,31 +150,24 @@ button {
 
 
 <p><strong>Developed by SSPL</strong></p>
-    <p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</strong></p>
+<p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</i></strong></p>
 
+<!-- 🔐 Login Gate -->
+<div style="margin-top: 20px; margin-bottom: 15px;">
+  <label for="loginInput" style="font-weight: bold;">Enter Passphrase:</label>
+  <input type="password" id="loginInput" placeholder="Your key of trust" />
+  <button onclick="attemptLogin()">Login</button>
+</div>
+
+<!-- 🔓 Case Selector (locked until login) -->
 <div style="margin-bottom: 15px;">
   <label for="caseSelector" style="font-weight: bold;">Select Case:</label>
-  <select id="caseSelector">
+  <select id="caseSelector" disabled>
     <option value="">-- Choose a case --</option>
   </select>
 </div>
 
-<script>
-  fetch("/list-cases")
-    .then(res => res.json())
-    .then(folders => {
-      const selector = document.getElementById("caseSelector");
-      folders.forEach(folder => {
-        const option = document.createElement("option");
-        option.value = folder.id;
-        option.textContent = folder.name;
-        selector.appendChild(option);
-      });
-    })
-    .catch(err => {
-      console.error("❌ Failed to load case folders:", err);
-    });
-</script>
+<script src="/access/login.js"></script>
 
     <label for="cameraInput" class="camera-btn">   
    <img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="Camera">

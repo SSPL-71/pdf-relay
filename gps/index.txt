@@ -25,9 +25,50 @@
    
 </head>
 <body>
-   
+<style> 
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+}
 
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
 
+video, canvas, img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 40px;
+  }
+
+  video, canvas, img {
+    max-width: 600px;
+    margin: auto;
+  }
+}  
+
+</style>
 
 <!-- SECTION: GPS Camera Tool -->
 <section>
@@ -127,7 +168,7 @@
 </div>
 
 <script>
-  fetch("http://localhost:3000/list-cases")
+  fetch("/list-cases")
     .then(res => res.json())
     .then(folders => {
       const selector = document.getElementById("caseSelector");
@@ -269,16 +310,49 @@ ctx.imageSmoothingQuality = "high";
     checkbox.value = imageCounter;
     checkbox.style.display = "inline";
 
-    checkbox.addEventListener('change', function () {
-        if (this.checked) {
-            console.log(`Image ${imageCounter} selected.`);
-        } else {
-            console.log(`Image ${imageCounter} deselected.`);
-        }
-    });
+// Add event listener for upload
+checkbox.addEventListener('change', function () {
+    if (this.checked) {
+        console.log(`Image ${imageCounter} selected.`);
 
-    canvasContainer.appendChild(checkbox);
-    canvasContainer.appendChild(downloadLink);
+        // Convert image to Blob
+        const blob = dataURItoBlob(imageData);
+
+        // Convert Blob to base64 and upload
+        blobToBase64(blob).then(base64Data => {
+            const selector = document.getElementById("caseSelector");
+            const selectedFolderId = selector.value;
+
+            if (!selectedFolderId) {
+                alert("Please select a case before uploading.");
+                return;
+            }
+
+            fetch("/upload-pdf", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    folderId: selectedFolderId,
+                    fileName: fileName,
+                    base64: base64Data
+                })
+            })
+            .then(res => res.text())
+            .then(result => {
+                console.log("✅ Image uploaded:", result);
+                alert(`✅ ${fileName} uploaded to Drive.`);
+            })
+            .catch(err => {
+                console.error("❌ Upload failed:", err);
+                alert("❌ Upload failed. Please try again.");
+            });
+        });
+    }
+});
+
+// ✅ Append elements to canvasContainer outside the event listener
+canvasContainer.appendChild(checkbox);
+canvasContainer.appendChild(downloadLink);
 
     // Call PDF function
     generatePDF(imageData, exifDate, imageCounter);
@@ -347,6 +421,19 @@ function generatePDF(imageData, exifDate, count) {
     };
 }
 
+function dataURItoBlob(dataURI) {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([ab], { type: mimeString });
+}
+
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -359,6 +446,7 @@ function blobToBase64(blob) {
   });
 }
 
+const fileCounters = {};
 function mergeToPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
@@ -422,22 +510,41 @@ function mergeToPDF() {
 
   Promise.all(imagePromises).then(() => {
     const pdfBlob = new Blob([pdf.output("arraybuffer")], { type: "application/pdf" });
-    const fileName = "597_NALINAKSHACHARLU_GPS_Report.pdf";
-    const selectedFolderId = document.getElementById("caseSelector").value;
+
+   const selector = document.getElementById("caseSelector");
+   const selectedFolderId = selector.value;
+   const rawName = selector.selectedOptions[0].textContent.trim();
+   const normalized = rawName.replace(/–/g, "-").replace(/\s*-\s*/g, "-");
+   const parts = normalized.split("-");
+
+let caseNumber = parts[0]?.trim() || "Unknown";
+let caseName = parts[1]?.trim().replace(/\s+/g, "_") || "Unknown";
+
+const baseKey = `${caseNumber}_${caseName}`;
+fileCounters[baseKey] = (fileCounters[baseKey] || 0) + 1;
+
+const suffix = fileCounters[baseKey] > 1 ? `-${fileCounters[baseKey] - 1}` : "";
+const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 
     if (!selectedFolderId) {
       alert("Please select a case before uploading.");
       return;
     }
-console.log("PDF Blob size:", pdfBlob.size);
+
+    console.log("📄 PDF Blob size:", pdfBlob.size);
+    console.log("📁 Selected folder ID:", selectedFolderId);
+    console.log("📁 File name:", fileName);
+
     blobToBase64(pdfBlob).then(base64Data => {
       const payload = {
         folderId: selectedFolderId,
         fileName: fileName,
         base64: base64Data
       };
-console.log("Base64 length:", base64Data.length);
-      fetch("https://script.google.com/macros/s/AKfycbzPVOQlnhW0UHkkgVdzLOuh4M_3ArvXFE8UspbHRYwmU_t1IHrwta18dOIc87iDBcAl/exec", {
+
+      console.log("📦 Base64 length:", base64Data.length);
+
+      fetch("/upload-pdf", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -446,16 +553,16 @@ console.log("Base64 length:", base64Data.length);
       })
         .then(response => response.text())
         .then(result => {
-          console.log("Upload success:", result);
+          console.log("✅ Upload success:", result);
           alert("✅ PDF uploaded successfully to Drive.");
         })
         .catch(error => {
-          console.error("Upload failed:", error);
+          console.error("❌ Upload failed:", error);
           alert("❌ Upload failed. Please try again.");
         });
     });
   }).catch(error => {
-    console.error("Error merging PDF:", error);
+    console.error("❌ Error merging PDF:", error);
     alert("❌ PDF merge failed. Please check your images and try again.");
   });
 }

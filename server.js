@@ -76,6 +76,7 @@ app.get("/list-cases", async (req, res) => {
 });
 
 // 🔹 Serve frontend from gps/index.html
+app.use("/access", express.static(path.join(__dirname, "access")));
 app.use(express.static(path.join(__dirname, "gps")));
 
 app.get("/", (req, res) => {
