@@ -218,7 +218,8 @@ button {
                         drawImageWithOverlay(uploadedImage, exifDate);
                     });
                 };
-                uploadedImage.src = e.target.result;
+                
+		uploadedImage.src = e.target.result;
             };
             reader.readAsDataURL(file);
         });
