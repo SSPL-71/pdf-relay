@@ -214,8 +214,6 @@ button {
 reader.onload = function (e) {
   const imageData = e.target.result;
   const uploadedImage = new Image();
-  let exifDate = null;
-  let imageLoaded = false;
 
 let drawCalled = false;
 
@@ -229,6 +227,7 @@ uploadedImage.onload = function () {
 };
 
 uploadedImage.src = imageData;
+};
 
             reader.readAsDataURL(file);
         });
