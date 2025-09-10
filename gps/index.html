@@ -217,24 +217,16 @@ reader.onload = function (e) {
   let exifDate = null;
   let imageLoaded = false;
 
-  let drawCalled = false;
-
-const tryDraw = () => {
-  if (imageLoaded && exifDate !== null && !drawCalled) {
-    drawCalled = true;
-    drawImageWithOverlay(uploadedImage, exifDate);
-  }
-};
+let drawCalled = false;
 
 uploadedImage.onload = function () {
-  imageLoaded = true;
-  tryDraw();
-};
+  if (drawCalled) return;
+  drawCalled = true;
 
-readEXIFGPS(file, function (date) {
-  exifDate = date;
-  tryDraw();
-});
+  readEXIFGPS(file, function (exifDate) {
+    drawImageWithOverlay(uploadedImage, exifDate);
+  });
+};
 
 uploadedImage.src = imageData;
 
