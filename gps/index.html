@@ -157,7 +157,7 @@ button {
 
 
 
-<p><strong>Developed by SSPL </strong></p>
+<p><strong>Developed by SSPL</strong></p>
     <p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</strong></p>
 
 <div style="margin-bottom: 15px;">
@@ -211,24 +211,15 @@ button {
 
             console.log("Image selected:", file.name);
             const reader = new FileReader();
-reader.onload = function (e) {
-  const imageData = e.target.result;
-  const uploadedImage = new Image();
-
-let drawCalled = false;
-
-uploadedImage.onload = function () {
-  if (drawCalled) return;
-  drawCalled = true;
-
-  readEXIFGPS(file, function (exifDate) {
-    drawImageWithOverlay(uploadedImage, exifDate);
-  });
-};
-
-uploadedImage.src = imageData;
-};
-
+            reader.onload = function (e) {
+                let uploadedImage = new Image();
+                uploadedImage.onload = function () {
+                    readEXIFGPS(file, function (exifDate) {
+                        drawImageWithOverlay(uploadedImage, exifDate);
+                    });
+                };
+                uploadedImage.src = e.target.result;
+            };
             reader.readAsDataURL(file);
         });
 
@@ -279,19 +270,11 @@ uploadedImage.src = imageData;
                 });
         }
 function drawImageWithOverlay(image, exifDate) {
-    if (!image.width || !image.height) {
-        console.warn("Image dimensions not ready. Skipping draw.");
-        return;
-    }
-
     const canvasContainer = document.getElementById("canvasContainer");
 
-// Optional: Clear previous canvas if you want only one image at a time
-// canvasContainer.innerHTML = "";
-
-const canvas = document.createElement("canvas");
-canvas.classList.add("gpsCanvas"); // Optional styling hook
-canvasContainer.appendChild(canvas);
+    // Create a new canvas for each image
+    const canvas = document.createElement("canvas");
+    canvasContainer.appendChild(canvas);
     const ctx = canvas.getContext("2d");
 
     let maxWidth = window.innerWidth * 0.9;
