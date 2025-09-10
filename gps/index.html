@@ -224,33 +224,40 @@ button {
         });
 
         function readEXIFGPS(file, callback) {
-            EXIF.getData(file, function () {
-                const lat = EXIF.getTag(this, "GPSLatitude");
-                const lon = EXIF.getTag(this, "GPSLongitude");
-                const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
-                const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "E";
+    let alreadyCalled = false;
+    function safeCallback(date) {
+        if (alreadyCalled) return;
+        alreadyCalled = true;
+        callback(date);
+    }
 
-                let exifDate = EXIF.getTag(this, "DateTimeOriginal");
-                if (exifDate) {
-                    exifDate = exifDate.replace(/:/g, "-").replace(" ", " @ ");
-                } else {
-                    exifDate = new Date().toLocaleString();
-                }
+    EXIF.getData(file, function () {
+        const lat = EXIF.getTag(this, "GPSLatitude");
+        const lon = EXIF.getTag(this, "GPSLongitude");
+        const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
+        const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "E";
 
-                console.log("EXIF Date Extracted:", exifDate); // Debugging log
-
-                if (lat && lon) {
-                    const latitude = convertToDecimal(lat, latRef);
-                    const longitude = convertToDecimal(lon, lonRef);
-                    gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-                    fetchAddress(latitude, longitude, exifDate, callback); // Pass exifDate
-                } else {
-                    gpsCoordinates = "GPS not found!";
-                    address = "Address not available";
-                    callback(exifDate); // Directly call drawImageWithOverlay if no GPS
-                }
-            });
+        let exifDate = EXIF.getTag(this, "DateTimeOriginal");
+        if (exifDate) {
+            exifDate = exifDate.replace(/:/g, "-").replace(" ", " @ ");
+        } else {
+            exifDate = new Date().toLocaleString();
         }
+
+        console.log("EXIF Date Extracted:", exifDate);
+
+        if (lat && lon) {
+            const latitude = convertToDecimal(lat, latRef);
+            const longitude = convertToDecimal(lon, lonRef);
+            gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            fetchAddress(latitude, longitude, exifDate, safeCallback);
+        } else {
+            gpsCoordinates = "GPS not found!";
+            address = "Address not available";
+            safeCallback(exifDate);
+        }
+    });
+}
 
         function convertToDecimal(coord, ref) {
             let decimal = coord[0] + coord[1] / 60 + coord[2] / 3600;
