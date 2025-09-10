@@ -288,11 +288,19 @@ uploadedImage.src = imageData;
                 });
         }
 function drawImageWithOverlay(image, exifDate) {
+    if (!image.width || !image.height) {
+        console.warn("Image dimensions not ready. Skipping draw.");
+        return;
+    }
+
     const canvasContainer = document.getElementById("canvasContainer");
 
-    // Create a new canvas for each image
-    const canvas = document.createElement("canvas");
-    canvasContainer.appendChild(canvas);
+// Optional: Clear previous canvas if you want only one image at a time
+// canvasContainer.innerHTML = "";
+
+const canvas = document.createElement("canvas");
+canvas.classList.add("gpsCanvas"); // Optional styling hook
+canvasContainer.appendChild(canvas);
     const ctx = canvas.getContext("2d");
 
     let maxWidth = window.innerWidth * 0.9;
