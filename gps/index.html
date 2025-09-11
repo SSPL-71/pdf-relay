@@ -62,72 +62,38 @@
     }
 
     .brand img {
-      height: 60px;
+      width: 60px;
+      height: auto;
+      max-height: 60px;
       margin-right: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      object-fit: contain;
     }
 
     .brand h1 {
-      font-size: 1.8em;
+      font-size: 1.6em;
       margin: 0;
       font-weight: 600;
+      line-height: 1.2;
     }
 
-    .container {
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 30px;
-      background-color: #e6f2ff;
-      border-radius: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-      transition: box-shadow 0.3s ease;
-    }
-
-    .container:hover {
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-    }
-
-    video, canvas, img {
-      width: 100%;
-      max-width: 100%;
-      height: auto;
-      display: block;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    button {
-      padding: 12px 24px;
-      margin: 12px 0;
-      font-size: 16px;
-      font-weight: 500;
-      background-color: #4a90e2;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease, transform 0.2s ease;
-    }
-
-    button:hover {
-      background-color: #357ab8;
-      transform: translateY(-2px);
-    }
-
-    @media (min-width: 768px) {
-      .container {
-        padding: 40px;
+    @media (max-width: 600px) {
+      .brand {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
       }
 
-      video, canvas, img {
-        max-width: 600px;
-        margin: auto;
+      .brand img {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 50px;
+        max-height: 50px;
       }
 
       .brand h1 {
-        font-size: 2em;
+        font-size: 1.4em;
       }
     }
   </style>
