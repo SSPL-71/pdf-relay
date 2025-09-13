@@ -382,8 +382,8 @@ if (includeGPS) {
 }
 
     // Generate image URL and set the download link
-    const imageData = canvas.toDataURL("image/jpeg");
-    let fileName = `GPS_Photo_${imageCounter}.jpg`;
+    const imageData = canvas.toDataURL("image/png");
+    let fileName = `GPS_Photo_${imageCounter}.png`;
 
     const downloadLink = document.createElement("a");
     downloadLink.href = imageData;
