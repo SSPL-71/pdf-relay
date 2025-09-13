@@ -253,7 +253,16 @@
     
 
 
-
+<div style="margin-bottom: 10px;">
+  <label class="switch-label">Include GPS Overlay:</label>
+  <label class="switch">
+    <input type="checkbox" id="gpsToggle" checked>
+    <span class="slider round"></span>
+  </label>
+  <p style="font-size: 0.9em; color: #555; margin-top: 5px; font-style: italic;">
+    Slide On for GPS Coordinates. Slide off plain Image.
+  </p>
+</div>
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
     <center><div class="canvas-container" id="canvasContainer"></div></center>
 <center style="margin-top: 20px;">
@@ -353,18 +362,23 @@ function drawImageWithOverlay(image, exifDate) {
     canvas.height = image.height * scaleFactor;
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+    const includeGPS = document.getElementById('gpsToggle').checked;
+
+if (includeGPS) {
     ctx.fillStyle = "black";
     ctx.fillRect(0, canvas.height - 120, canvas.width, 100);
     ctx.fillStyle = "yellow";
     ctx.font = "14px Arial";
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+
     let addressLines = splitText(ctx, address, canvas.width - 40);
     ctx.fillText(`Date: ${exifDate}`, 20, canvas.height - 110);
     ctx.fillText(`GPS: ${gpsCoordinates}`, 20, canvas.height - 90);
     addressLines.forEach((line, index) => {
         ctx.fillText(line, 20, canvas.height - 70 + index * 20);
     });
+}
 
     // Generate image URL and set the download link
     const imageData = canvas.toDataURL("image/jpeg");
