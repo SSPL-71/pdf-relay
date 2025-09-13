@@ -253,8 +253,16 @@
     
 
 
+<div style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center;">
+  <label for="gpsSlider" style="font-weight: bold; margin-bottom: 5px;">GPS Overlay:</label>
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="font-size: 0.9em; color: #555;">Off</span>
+    <input type="range" id="gpsSlider" min="0" max="1" step="1" value="1" style="width: 100px;">
+    <span style="font-size: 0.9em; color: #555;">On</span>
+  </div>
+</div>
 
-    <input type="file" id="cameraInput" accept="image/*" capture="environment">
+    <input type="file" id="cameraInput" accept="image/*">
     <center><div class="canvas-container" id="canvasContainer"></div></center>
 <center style="margin-top: 20px;">
   <button id="uploadSingleBtn" style="display:none;" onclick="uploadSingleImage()">Convert to PDF and Upload to Drive</button>
@@ -353,22 +361,29 @@ function drawImageWithOverlay(image, exifDate) {
     canvas.height = image.height * scaleFactor;
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    const includeGPS = document.getElementById('gpsSlider').value === "1";
+
+if (includeGPS) {
     ctx.fillStyle = "black";
     ctx.fillRect(0, canvas.height - 120, canvas.width, 100);
     ctx.fillStyle = "yellow";
     ctx.font = "14px Arial";
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+
+
     let addressLines = splitText(ctx, address, canvas.width - 40);
     ctx.fillText(`Date: ${exifDate}`, 20, canvas.height - 110);
     ctx.fillText(`GPS: ${gpsCoordinates}`, 20, canvas.height - 90);
     addressLines.forEach((line, index) => {
         ctx.fillText(line, 20, canvas.height - 70 + index * 20);
     });
+}
 
     // Generate image URL and set the download link
-    const imageData = canvas.toDataURL("image/jpeg");
-    let fileName = `GPS_Photo_${imageCounter}.jpg`;
+    const imageData = canvas.toDataURL("image/png");
+    let fileName = `GPS_Photo_${imageCounter}.png`;
 
     const downloadLink = document.createElement("a");
     downloadLink.href = imageData;
@@ -444,36 +459,32 @@ function generatePDF(imageData, exifDate, count) {
     const img = new Image();
     img.src = imageData;
     img.onload = function () {
-const pdf = new jsPDF(); // Default A4 size
-const pageWidth = pdf.internal.pageSize.getWidth();
-const pageHeight = pdf.internal.pageSize.getHeight();
+        const pdf = new jsPDF(); // Default A4 size
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
 
-const imgRatio = img.width / img.height;
-const pageRatio = pageWidth / pageHeight;
+        const imgRatio = img.width / img.height;
+        const pageRatio = pageWidth / pageHeight;
 
-let imgWidth, imgHeight;
+        let imgWidth, imgHeight;
 
-if (imgRatio > pageRatio) {
-    imgWidth = pageWidth;
-    imgHeight = pageWidth / imgRatio;
-} else {
-    imgHeight = pageHeight;
-    imgWidth = pageHeight * imgRatio;
-}
+        if (imgRatio > pageRatio) {
+            imgWidth = pageWidth;
+            imgHeight = pageWidth / imgRatio;
+        } else {
+            imgHeight = pageHeight;
+            imgWidth = pageHeight * imgRatio;
+        }
 
-const x = (pageWidth - imgWidth) / 2;
-const y = (pageHeight - imgHeight) / 2;
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
 
-pdf.addImage(img, "JPEG", x, y, imgWidth, imgHeight);
+        pdf.addImage(img, "PNG", x, y, imgWidth, imgHeight); // Use PNG if imageData is PNG
 
-        pdf.addImage(imageData, "JPEG", 0, 0, pdfWidth, pdfHeight);
-
-        let pdfFileName = `GPS_Photo_${count}.pdf`;
-
+        const pdfFileName = `GPS_Photo_${count}.pdf`;
         const pdfBlob = pdf.output("blob");
         const pdfURL = URL.createObjectURL(pdfBlob);
 
-        // Create a download link for the generated PDF
         const pdfDownloadLink = document.createElement("a");
         pdfDownloadLink.href = pdfURL;
         pdfDownloadLink.download = pdfFileName;
@@ -484,7 +495,6 @@ pdf.addImage(img, "JPEG", x, y, imgWidth, imgHeight);
         console.log(`PDF created for ${pdfFileName}`);
     };
 }
-
 function dataURItoBlob(dataURI) {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
@@ -673,7 +683,7 @@ function uploadSingleImage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           folderId: folderId,
-          fileName: selected.fileName.replace(".jpg", ".pdf"),
+          fileName: selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"),
           base64: base64Data
         })
       })
@@ -719,7 +729,7 @@ function mergeSelectedImages() {
       const x = (pageWidth - scaledWidth) / 2;
       const y = (pageHeight - scaledHeight) / 2;
 
-      pdf.addImage(img, "JPEG", x, y, scaledWidth, scaledHeight);
+      pdf.addImage(img, "PNG", x, y, scaledWidth, scaledHeight);
 
       if (index < selectedImages.length - 1) {
         pdf.addPage();
