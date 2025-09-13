@@ -3,8 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SS Services - GPS Camera Internal</title>
+    <title>SS Services - GPS Camera Pro</title>
+
+<meta name="description" content="Use GPS Camera Pro by SS Services to Capture GPS Images and Save them directly as Image or PDF, a free secure productivity tool from SSPL in Karnataka.">
+  <meta name="keywords" content="GPS Camera, GPS Camera Pro, claims investigations Karnataka, PDF tools online free, GPStool, 3ctool image to PDF, PDF compression, SS Services, Sarvasiddhanta Services Private Limited, SSPL, image conversion">
+  <meta name="author" content="Sarvasiddhanta Services Private Limited">
+
+  <meta name="google-adsense-account" content="ca-pub-2931901961774543">    
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="canonical" href="https://ss-services.co.in/gpstool">
+  <!-- Schema Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "GPStool",
+    "operatingSystem": "Web",
+    "applicationCategory": "Utility",
+    "description": "GPStool is a free online tool to capture images with geotagging, and convert images to PDF.",
+    "url": "https://ss-services.co.in/gpstool",
+    "author": {
+      "@type": "Organization",
+      "name": "Sarvasiddhanta Services Private Limited"
+    }
+  }
+  </script>
  
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.216/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -18,69 +44,91 @@
 </head>
 
 <body>
-<style> 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  box-sizing: border-box;
-  background: linear-gradient(to bottom right, #e6f2ff, #ffffff);
-  color: #333;
-}
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      box-sizing: border-box;
+      background: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+      color: #333;
+    }
 
-.container {
-  max-width: 800px;
-  margin: 60px auto;
-  padding: 30px;
-  background-color: #e6f2ff;
-  border-radius: 12px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease;
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      padding: 20px 40px;
+      background-color: #e6f2ff;
+    }
 
-.container:hover {
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
-}
+    .brand img {
+      width: 60px;
+      height: auto;
+      max-height: 60px;
+      margin-right: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      object-fit: contain;
+    }
 
-video, canvas, img {
-  width: 100%;
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin-bottom: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+    .brand h1 {
+      font-size: 1.6em;
+      margin: 0;
+      font-weight: 600;
+      line-height: 1.2;
+      text-align: left;
+    }
 
-button {
-  padding: 12px 24px;
-  margin: 12px 0;
-  font-size: 16px;
-  font-weight: 500;
-  background-color: #4a90e2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
+    .navigation {
+      text-align: left;
+      padding: 20px 40px;
+    }
 
-button:hover {
-  background-color: #357ab8;
-  transform: translateY(-2px);
-}
+    .back-link {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      text-decoration: underline;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
 
-@media (min-width: 768px) {
-  .container {
-    padding: 40px;
-  }
+    @media (max-width: 600px) {
+      .brand {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
 
-  video, canvas, img {
-    max-width: 600px;
-    margin: auto;
-  }
-}
-</style>
+      .brand img {
+        margin-right: 0;
+        margin-bottom: 10px;
+        width: 50px;
+        max-height: 50px;
+      }
+
+      .brand h1 {
+        font-size: 1.4em;
+        text-align: center;
+      }
+
+      .navigation {
+        text-align: center;
+        padding: 10px 20px;
+      }
+    }
+  </style>
+
+  <div class="brand">
+    <img src="New Logo.jpg" alt="SSPL logo">
+    <h1>SARVASIDDHANTA SERVICES PRIVATE LIMITED</h1>
+  </div>
+
+  <div class="navigation">
+    <a href="https://ss-services.co.in" class="back-link">← Back to Main Page</a>
+    <br>
+  </div>
+</body>
 
 <!-- SECTION: GPS Camera Tool -->
 <section>

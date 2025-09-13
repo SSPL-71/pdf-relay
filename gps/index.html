@@ -444,15 +444,27 @@ function generatePDF(imageData, exifDate, count) {
     const img = new Image();
     img.src = imageData;
     img.onload = function () {
-        let pdfWidth = 210; // A4 width in mm
-        let imgRatio = img.width / img.height;
-        let pdfHeight = pdfWidth / imgRatio;
+const pdf = new jsPDF(); // Default A4 size
+const pageWidth = pdf.internal.pageSize.getWidth();
+const pageHeight = pdf.internal.pageSize.getHeight();
 
-        const pdf = new jsPDF({
-            orientation: pdfHeight > pdfWidth ? "portrait" : "landscape",
-            unit: "mm",
-            format: [pdfWidth, pdfHeight],
-        });
+const imgRatio = img.width / img.height;
+const pageRatio = pageWidth / pageHeight;
+
+let imgWidth, imgHeight;
+
+if (imgRatio > pageRatio) {
+    imgWidth = pageWidth;
+    imgHeight = pageWidth / imgRatio;
+} else {
+    imgHeight = pageHeight;
+    imgWidth = pageHeight * imgRatio;
+}
+
+const x = (pageWidth - imgWidth) / 2;
+const y = (pageHeight - imgHeight) / 2;
+
+pdf.addImage(img, "JPEG", x, y, imgWidth, imgHeight);
 
         pdf.addImage(imageData, "JPEG", 0, 0, pdfWidth, pdfHeight);
 
