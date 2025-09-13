@@ -253,16 +253,15 @@
     
 
 
-<div style="margin-bottom: 10px;">
-  <label class="switch-label">Include GPS Overlay:</label>
-  <label class="switch">
-    <input type="checkbox" id="gpsToggle" checked>
-    <span class="slider round"></span>
-  </label>
-  <p style="font-size: 0.9em; color: #555; margin-top: 5px; font-style: italic;">
-    Slide On for GPS Coordinates. Slide off plain Image.
-  </p>
+<div style="margin-bottom: 15px;">
+  <label for="gpsSlider" style="font-weight: bold;">GPS Overlay:</label>
+  <input type="range" id="gpsSlider" min="0" max="1" step="1" value="1" style="width: 200px;">
+  <div style="display: flex; justify-content: space-between; width: 200px; font-size: 0.9em; color: #555;">
+    <span>GPS Off</span>
+    <span>GPS On</span>
+  </div>
 </div>
+
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
     <center><div class="canvas-container" id="canvasContainer"></div></center>
 <center style="margin-top: 20px;">
@@ -362,7 +361,7 @@ function drawImageWithOverlay(image, exifDate) {
     canvas.height = image.height * scaleFactor;
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    const includeGPS = document.getElementById('gpsToggle').checked;
+    const includeGPS = document.getElementById('gpsSlider').value === "1";
 
 if (includeGPS) {
     ctx.fillStyle = "black";
