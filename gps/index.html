@@ -80,8 +80,8 @@
     }
 
     .navigation {
-      text-align: center;
-      margin-top: 20px;
+      text-align: left;
+      padding: 20px 40px;
     }
 
     .back-link {
@@ -89,6 +89,8 @@
       font-weight: bold;
       color: #333;
       text-decoration: underline;
+      display: inline-block;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 600px) {
@@ -109,6 +111,11 @@
         font-size: 1.4em;
         text-align: center;
       }
+
+      .navigation {
+        text-align: center;
+        padding: 10px 20px;
+      }
     }
   </style>
 
@@ -119,9 +126,9 @@
 
   <div class="navigation">
     <a href="https://ss-services.co.in" class="back-link">← Back to Main Page</a>
+    <br>
   </div>
 </body>
-
 <!-- SECTION: GPS Camera Tool -->
 <section>
  <title>Camera with GPS & Address Overlay</title>
