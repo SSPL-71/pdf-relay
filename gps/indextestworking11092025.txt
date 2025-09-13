@@ -14,30 +14,32 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker registered'))
-      .catch(err => console.error('SW registration failed:', err));
-  }
-</script>
-
-   
+ <script src="/access/login.js"></script>  
 </head>
+
 <body>
 <style> 
 body {
   margin: 0;
   padding: 0;
-  font-family: sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   box-sizing: border-box;
-  background-color: #f9f9f9;
+  background: linear-gradient(to bottom right, #e6f2ff, #ffffff);
+  color: #333;
 }
 
 .container {
   max-width: 800px;
-  margin: auto;
-  padding: 20px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #e6f2ff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.container:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
 }
 
 video, canvas, img {
@@ -46,15 +48,26 @@ video, canvas, img {
   height: auto;
   display: block;
   margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 button {
-  padding: 10px 20px;
-  margin: 10px 0;
+  padding: 12px 24px;
+  margin: 12px 0;
   font-size: 16px;
+  font-weight: 500;
+  background-color: #4a90e2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #357ab8;
+  transform: translateY(-2px);
 }
 
 @media (min-width: 768px) {
@@ -66,8 +79,7 @@ button {
     max-width: 600px;
     margin: auto;
   }
-}  
-
+}
 </style>
 
 <!-- SECTION: GPS Camera Tool -->
@@ -148,41 +160,44 @@ button {
         }
     </style>
 
-<div class="container" style="max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px;"> 
-    <h2> GPS CAMERA PRO! </h2>
-    <h2><i> NO APP DOWNLOAD & ZERO ADS!</i></h2>
-<h2 style="color: #FF5733;"><strong><i>📸 NEW FEATURES ALERT!</i></strong></h2>
-<h2 style="color: #33C1FF;"><strong><i>✅ Capture multiple images in one go</i></strong></h2>
-<h2 style="color: #33C1FF;"><strong><i>✅ Merge them into a single PDF with just one click!</i></strong></h2>
+<div class="container" style="max-width: 800px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); text-align: center;">
+  <h1 style="margin-bottom: 10px; font-size: 2em; color: #222;">🧿 GPS CAMERA PRO</h1>
+  <p style="font-size: 1.2em; color: #555; margin-bottom: 20px;"><em>No app download. Zero ads. Just clarity.</em></p>
 
+  <h2 style="color: #FF5733; margin-top: 30px;"><strong>📸 New Features Alert</strong></h2>
+  <ul style="list-style: none; padding: 0; font-size: 1.1em; color: #333;">
+    <li style="margin: 10px 0; color: #33C1FF;">✅ Capture multiple images in one go</li>
+    <li style="margin: 10px 0; color: #33C1FF;">✅ Merge them into a single PDF with just one click</li>
+    <li style="margin: 10px 0; color: #33C1FF;">✅ Upload them directly to respective case folders</li>
+      
+</ul>
+</div>
 
 
 <p><strong>Developed by SSPL</strong></p>
-    <p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</strong></p>
+<p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</i></strong></p>
 
-<div style="margin-bottom: 15px;">
-  <label for="caseSelector" style="font-weight: bold;">Select Case:</label>
-  <select id="caseSelector">
+<p><strong> If you are an Employee of SSPL, use your Login to access the folders where you would like to store the Images / Files</strong><p>
+<p><strong> If you are a visitor / guest, directly click on Camera Icon and you can download the Images/ Files to your device</strong><p>
+
+<!-- 🔐 Login Gate -->
+<div style="margin-top: 30px; margin-bottom: 25px; padding: 20px; background-color: #f0f4f8; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+  <label for="loginInput" style="font-weight: 600; font-size: 1.1em; color: #333;">🔐 Enter Passphrase</label><br>
+  <input type="password" id="loginInput" placeholder="Your key of trust" style="width: 60%; padding: 10px; margin-top: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;" /><br>
+  <button onclick="attemptLogin()" style="background-color: #4a90e2; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; transition: background-color 0.3s ease;">
+    Login
+  </button>
+</div>
+
+<!-- 🔓 Case Selector (locked until login) -->
+<div style="margin-bottom: 25px; padding: 20px; width = 800px: background-color: #fefefe; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+  <label for="caseSelector" style="font-weight: 600; font-size: 1.1em; color: #333;">📂 Select Case</label>
+  <select id="caseSelector" disabled style="width: 60%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;">
     <option value="">-- Choose a case --</option>
   </select>
 </div>
 
-<script>
-  fetch("/list-cases")
-    .then(res => res.json())
-    .then(folders => {
-      const selector = document.getElementById("caseSelector");
-      folders.forEach(folder => {
-        const option = document.createElement("option");
-        option.value = folder.id;
-        option.textContent = folder.name;
-        selector.appendChild(option);
-      });
-    })
-    .catch(err => {
-      console.error("❌ Failed to load case folders:", err);
-    });
-</script>
+<script src="/access/login.js"></script>
 
     <label for="cameraInput" class="camera-btn">   
    <img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="Camera">
@@ -224,33 +239,40 @@ button {
         });
 
         function readEXIFGPS(file, callback) {
-            EXIF.getData(file, function () {
-                const lat = EXIF.getTag(this, "GPSLatitude");
-                const lon = EXIF.getTag(this, "GPSLongitude");
-                const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
-                const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "E";
+    let alreadyCalled = false;
+    function safeCallback(date) {
+        if (alreadyCalled) return;
+        alreadyCalled = true;
+        callback(date);
+    }
 
-                let exifDate = EXIF.getTag(this, "DateTimeOriginal");
-                if (exifDate) {
-                    exifDate = exifDate.replace(/:/g, "-").replace(" ", " @ ");
-                } else {
-                    exifDate = new Date().toLocaleString();
-                }
+    EXIF.getData(file, function () {
+        const lat = EXIF.getTag(this, "GPSLatitude");
+        const lon = EXIF.getTag(this, "GPSLongitude");
+        const latRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
+        const lonRef = EXIF.getTag(this, "GPSLongitudeRef") || "E";
 
-                console.log("EXIF Date Extracted:", exifDate); // Debugging log
-
-                if (lat && lon) {
-                    const latitude = convertToDecimal(lat, latRef);
-                    const longitude = convertToDecimal(lon, lonRef);
-                    gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-                    fetchAddress(latitude, longitude, exifDate, callback); // Pass exifDate
-                } else {
-                    gpsCoordinates = "GPS not found!";
-                    address = "Address not available";
-                    callback(exifDate); // Directly call drawImageWithOverlay if no GPS
-                }
-            });
+        let exifDate = EXIF.getTag(this, "DateTimeOriginal");
+        if (exifDate) {
+            exifDate = exifDate.replace(/:/g, "-").replace(" ", " @ ");
+        } else {
+            exifDate = new Date().toLocaleString();
         }
+
+        console.log("EXIF Date Extracted:", exifDate);
+
+        if (lat && lon) {
+            const latitude = convertToDecimal(lat, latRef);
+            const longitude = convertToDecimal(lon, lonRef);
+            gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+            fetchAddress(latitude, longitude, exifDate, safeCallback);
+        } else {
+            gpsCoordinates = "GPS not found!";
+            address = "Address not available";
+            safeCallback(exifDate);
+        }
+    });
+}
 
         function convertToDecimal(coord, ref) {
             let decimal = coord[0] + coord[1] / 60 + coord[2] / 3600;
