@@ -256,9 +256,9 @@
 <div style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center;">
   <label for="gpsSlider" style="font-weight: bold; margin-bottom: 5px;">GPS Overlay:</label>
   <div style="display: flex; align-items: center; gap: 8px;">
-    <span style="font-size: 0.9em; color: #555;">GPS Off</span>
+    <span style="font-size: 0.9em; color: #555;">Off</span>
     <input type="range" id="gpsSlider" min="0" max="1" step="1" value="1" style="width: 100px;">
-    <span style="font-size: 0.9em; color: #555;">GPS On</span>
+    <span style="font-size: 0.9em; color: #555;">On</span>
   </div>
 </div>
 
@@ -361,6 +361,9 @@ function drawImageWithOverlay(image, exifDate) {
     canvas.height = image.height * scaleFactor;
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
     const includeGPS = document.getElementById('gpsSlider').value === "1";
 
 if (includeGPS) {
@@ -368,8 +371,7 @@ if (includeGPS) {
     ctx.fillRect(0, canvas.height - 120, canvas.width, 100);
     ctx.fillStyle = "yellow";
     ctx.font = "14px Arial";
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+
 
     let addressLines = splitText(ctx, address, canvas.width - 40);
     ctx.fillText(`Date: ${exifDate}`, 20, canvas.height - 110);
