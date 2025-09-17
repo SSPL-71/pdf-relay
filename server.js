@@ -87,6 +87,10 @@ app.get("/gps", (req, res) => {
   res.sendFile(path.join(__dirname, "gps", "index.html"));
 });
 
+app.get("/BingSiteAuth.xml", (req, res) => {
+  res.sendFile(path.join(__dirname, "BingSiteAuth.xml"));
+});
+
 // ✅ Let Render handle the port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
