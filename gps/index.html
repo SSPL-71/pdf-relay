@@ -360,19 +360,19 @@
 
             console.log("Image selected:", file.name);
             const reader = new FileReader();
-            reader.onload = function (e) {
-                let uploadedImage = new Image();
-                uploadedImage.onload = function () {
-                    readEXIFGPS(file, function (exifDate) {
-                        drawImageWithOverlay(uploadedImage, exifDate);
-                    });
-                };
-                uploadedImage.src = e.target.result;
-            };
+reader.onload = function (e) {
+    let uploadedImage = new Image();
+    uploadedImage.onload = function () {
+        readEXIFGPS(file, function (exifDate) {
+            drawImageWithOverlay(uploadedImage, exifDate);
+        }, uploadedImage); // Pass image explicitly
+    };
+    uploadedImage.src = e.target.result;
+};
             reader.readAsDataURL(file);
         });
 
-        function readEXIFGPS(file, callback) {
+function readEXIFGPS(file, callback, image) {
     let alreadyCalled = false;
     function safeCallback(date) {
         if (alreadyCalled) return;
@@ -426,16 +426,16 @@
             return (ref === "S" || ref === "W") ? -decimal : decimal;
         }
 
-        function fetchAddress(lat, lon, exifDate, callback) {
+        function fetchAddress(lat, lon, exifDate, image, callback) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                 .then(response => response.json())
                 .then(data => {
                     address = data.display_name || "Address not found";
-                    callback(exifDate); // Use extracted EXIF date
+                    callback(exifDate, image); // Use extracted EXIF date
                 })
                 .catch(() => {
                     address = "Failed to fetch address";
-                    callback(exifDate); // Ensure EXIF date is used even on failure
+                    callback(exifDate, image); // Ensure EXIF date is used even on failure
                 });
         }
 function drawImageWithOverlay(image, exifDate) {
