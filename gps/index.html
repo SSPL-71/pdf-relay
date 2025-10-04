@@ -377,7 +377,7 @@ function readEXIFGPS(file, callback, image) {
     function safeCallback(date) {
         if (alreadyCalled) return;
         alreadyCalled = true;
-        callback(date);
+        callback(date, image);
     }
 
     EXIF.getData(file, function () {
