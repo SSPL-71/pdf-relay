@@ -401,9 +401,22 @@
             gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
             fetchAddress(latitude, longitude, exifDate, safeCallback);
         } else {
-            gpsCoordinates = "GPS not found!";
-            address = "Address not available";
-            safeCallback(exifDate);
+            // Fallback to browser geolocation
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const latitude = pos.coords.latitude;
+                    const longitude = pos.coords.longitude;
+                    gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                    fetchAddress(latitude, longitude, exifDate, safeCallback);
+                },
+                (err) => {
+                    console.error("Geolocation error:", err.message);
+                    gpsCoordinates = "GPS not found!";
+                    address = "Address not available";
+                    safeCallback(exifDate);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
     });
 }

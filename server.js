@@ -91,6 +91,10 @@ app.get("/BingSiteAuth.xml", (req, res) => {
   res.sendFile(path.join(__dirname, "BingSiteAuth.xml"));
 });
 
+app.get("/robots.txt", (req, res) => {
+  res.sendFile(path.join(__dirname, "robots.txt"));
+});
+
 // ✅ Let Render handle the port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
