@@ -364,7 +364,7 @@ reader.onload = function (e) {
     let uploadedImage = new Image();
     uploadedImage.onload = function () {
         readEXIFGPS(file, function (exifDate, image) {
-            drawImageWithOverlay(uploadedImage, exifDate);
+            drawImageWithOverlay(Image, exifDate);
         }, uploadedImage); // Pass image explicitly
     };
     uploadedImage.src = e.target.result;
