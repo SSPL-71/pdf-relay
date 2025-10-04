@@ -399,7 +399,7 @@ function readEXIFGPS(file, callback, image) {
             const latitude = convertToDecimal(lat, latRef);
             const longitude = convertToDecimal(lon, lonRef);
             gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            fetchAddress(latitude, longitude, exifDate, safeCallback);
+            fetchAddress(latitude, longitude, exifDate, image, safeCallback);
         } else {
             // Fallback to browser geolocation
             navigator.geolocation.getCurrentPosition(
