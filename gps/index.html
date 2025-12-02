@@ -521,6 +521,9 @@ checkbox.addEventListener('change', function () {
 canvasContainer.appendChild(checkbox);
 canvasContainer.appendChild(downloadLink);
 
+    // Increment counter for next image
+    imageCounter++;
+
     // Call PDF function
     generatePDF(imageData, exifDate, imageCounter);
 
@@ -532,8 +535,7 @@ canvasContainer.appendChild(downloadLink);
         document.getElementById("mergeToPDF").style.display = "block";
     }
 
-    // Increment counter for next image
-    imageCounter++;
+
 }
 
 function splitText(ctx, text, maxWidth) {
