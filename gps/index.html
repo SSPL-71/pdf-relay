@@ -814,68 +814,70 @@ function mergeSelectedImages() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
-  let loadCount = 0;
+  // Wrap each image load in a Promise
+  const promises = selectedImages.map((imgObj, index) => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.src = imgObj.imageData;
 
-  selectedImages.forEach((imgObj, index) => {
-    const img = new Image();
-    img.src = imgObj.imageData;
+      img.onload = function () {
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
 
-    img.onload = function () {
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = img.width;
+        const imgHeight = img.height;
 
-      const imgWidth = img.width;
-      const imgHeight = img.height;
+        const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
 
-      const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-      const scaledWidth = imgWidth * scale;
-      const scaledHeight = imgHeight * scale;
+        const x = (pageWidth - scaledWidth) / 2;
+        const y = (pageHeight - scaledHeight) / 2;
 
-      const x = (pageWidth - scaledWidth) / 2;
-      const y = (pageHeight - scaledHeight) / 2;
+        pdf.addImage(img, "PNG", x, y, scaledWidth, scaledHeight);
 
-      pdf.addImage(img, "PNG", x, y, scaledWidth, scaledHeight);
-
-      if (index < selectedImages.length - 1) {
-        pdf.addPage();
-      }
-
-      loadCount++;
-      if (loadCount === selectedImages.length) {
-        const blob = pdf.output("blob");
-
-        const selector = document.getElementById("caseSelector");
-        const folderId = selector.value;
-        if (!folderId) {
-          alert("Please select a case before uploading.");
-          return;
+        if (index < selectedImages.length - 1) {
+          pdf.addPage();
         }
 
-        blobToBase64(blob).then(base64Data => {
-          fetch("/upload-pdf", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              folderId: folderId,
-              fileName: "Merged_Images.pdf",
-              base64: base64Data
-            })
-          })
-          .then(res => res.text())
-          .then(result => {
-            console.log("✅ Merged PDF uploaded:", result);
-            alert("✅ Merged PDF uploaded to Drive.");
-          })
-          .catch(err => {
-            console.error("❌ Upload failed:", err);
-            alert("❌ Upload failed. Please try again.");
-          });
+        resolve(); // mark this image as done
+      };
+    });
+  });
+
+  // Wait for all images to finish loading
+  Promise.all(promises).then(() => {
+    const blob = pdf.output("blob");
+
+    const selector = document.getElementById("caseSelector");
+    const folderId = selector.value;
+    if (!folderId) {
+      alert("Please select a case before uploading.");
+      return;
+    }
+
+    blobToBase64(blob).then(base64Data => {
+      fetch("/upload-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folderId: folderId,
+          fileName: "Merged_Images.pdf",
+          base64: base64Data
+        })
+      })
+        .then(res => res.text())
+        .then(result => {
+          console.log("✅ Merged PDF uploaded:", result);
+          alert("✅ Merged PDF uploaded to Drive.");
+        })
+        .catch(err => {
+          console.error("❌ Upload failed:", err);
+          alert("❌ Upload failed. Please try again.");
         });
-      }
-    };
+    });
   });
 }
-
 </script>
 </section>
 <!-- END SECTION: GPS Camera Tool --><br>
