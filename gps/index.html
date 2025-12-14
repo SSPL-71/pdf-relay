@@ -494,23 +494,29 @@ function drawImageWithOverlay(image, exifDate) {
         });
     }
 
-    // ✅ 3. Convert FULL‑RESOLUTION canvas to final image
-    const finalImageData = fullCanvas.toDataURL("image/png");
+   // ✅ 3. Create FINAL (screenshot-style) canvas at screen width
+const finalCanvas = document.createElement("canvas");
+const finalCtx = finalCanvas.getContext("2d");
 
-    // ✅ 4. Create DISPLAY canvas (scaled down for UI only)
-    const displayCanvas = document.createElement("canvas");
-    const displayCtx = displayCanvas.getContext("2d");
+// Option D: match screen width
+const targetWidth = window.innerWidth;  
+const scale = targetWidth / fullCanvas.width;
 
-    let maxWidth = window.innerWidth * 0.9;
-    let scaleFactor = maxWidth / fullCanvas.width;
+finalCanvas.width = targetWidth;
+finalCanvas.height = fullCanvas.height * scale;
 
-    displayCanvas.width = fullCanvas.width * scaleFactor;
-    displayCanvas.height = fullCanvas.height * scaleFactor;
+// ✅ Draw full-resolution canvas into smaller canvas (screenshot effect)
+finalCtx.drawImage(
+    fullCanvas,
+    0, 0, fullCanvas.width, fullCanvas.height,
+    0, 0, finalCanvas.width, finalCanvas.height
+);
 
-    displayCtx.drawImage(fullCanvas, 0, 0, displayCanvas.width, displayCanvas.height);
+// ✅ Convert this smaller canvas to PNG (final image)
+const finalImageData = finalCanvas.toDataURL("image/png");
 
-    // Add display canvas to UI
-    canvasContainer.appendChild(displayCanvas);
+// ✅ Display this smaller canvas in UI
+canvasContainer.appendChild(finalCanvas);
 
     // ✅ 5. Download link
     let fileName = `GPS_Photo_${imageCounter}.png`;
