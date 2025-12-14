@@ -445,95 +445,115 @@ function readEXIFGPS(file, callback, image) {
                     callback(exifDate, image); // Ensure EXIF date is used even on failure
                 });
         }
+
 function drawImageWithOverlay(image, exifDate) {
     const canvasContainer = document.getElementById("canvasContainer");
 
-    // Create a new canvas for each image
-    const canvas = document.createElement("canvas");
-    canvasContainer.appendChild(canvas);
-    const ctx = canvas.getContext("2d");
+    // ✅ 1. Create FULL‑RESOLUTION offscreen canvas
+    const fullCanvas = document.createElement("canvas");
+    fullCanvas.width = image.width;
+    fullCanvas.height = image.height;
+    const fullCtx = fullCanvas.getContext("2d");
 
-    let maxWidth = window.innerWidth * 0.9;
-    let scaleFactor = maxWidth / image.width;
-    canvas.width = image.width * scaleFactor;
-    canvas.height = image.height * scaleFactor;
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
+    // Draw original image at full resolution
+    fullCtx.drawImage(image, 0, 0, fullCanvas.width, fullCanvas.height);
 
     const includeGPS = document.getElementById('gpsSlider').value === "1";
 
-if (includeGPS) {
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, canvas.height - 120, canvas.width, 100);
-    ctx.fillStyle = "yellow";
-    ctx.font = "14px Arial";
+    // ✅ 2. Draw overlay ONLY on full‑resolution canvas
+    if (includeGPS) {
+        const blockHeight = 260; // Taller block for crisp text
+        fullCtx.fillStyle = "rgba(0,0,0,0.65)";
+        fullCtx.fillRect(0, fullCanvas.height - blockHeight, fullCanvas.width, blockHeight);
 
+        fullCtx.fillStyle = "yellow";
+        fullCtx.font = "48px Arial"; // Large crisp text
 
-    let addressLines = splitText(ctx, address, canvas.width - 40);
-    ctx.fillText(`Date: ${exifDate}`, 20, canvas.height - 110);
-    ctx.fillText(`GPS: ${gpsCoordinates}`, 20, canvas.height - 90);
-    addressLines.forEach((line, index) => {
-        ctx.fillText(line, 20, canvas.height - 70 + index * 20);
-    });
-}
+        fullCtx.fillText(`Date: ${exifDate}`, 40, fullCanvas.height - blockHeight + 70);
+        fullCtx.fillText(`GPS: ${gpsCoordinates}`, 40, fullCanvas.height - blockHeight + 140);
 
-    // Generate image URL and set the download link
-    const imageData = canvas.toDataURL("image/png");
+        // Wrap address text
+        fullCtx.font = "42px Arial";
+        let addressLines = [];
+        let words = address.split(" ");
+        let line = "";
+
+        words.forEach(word => {
+            let testLine = line + word + " ";
+            if (fullCtx.measureText(testLine).width > fullCanvas.width - 80) {
+                addressLines.push(line);
+                line = word + " ";
+            } else {
+                line = testLine;
+            }
+        });
+        addressLines.push(line);
+
+        addressLines.forEach((line, i) => {
+            fullCtx.fillText(line, 40, fullCanvas.height - blockHeight + 200 + (i * 50));
+        });
+    }
+
+    // ✅ 3. Convert FULL‑RESOLUTION canvas to final image
+    const finalImageData = fullCanvas.toDataURL("image/png");
+
+    // ✅ 4. Create DISPLAY canvas (scaled down for UI only)
+    const displayCanvas = document.createElement("canvas");
+    const displayCtx = displayCanvas.getContext("2d");
+
+    let maxWidth = window.innerWidth * 0.9;
+    let scaleFactor = maxWidth / fullCanvas.width;
+
+    displayCanvas.width = fullCanvas.width * scaleFactor;
+    displayCanvas.height = fullCanvas.height * scaleFactor;
+
+    displayCtx.drawImage(fullCanvas, 0, 0, displayCanvas.width, displayCanvas.height);
+
+    // Add display canvas to UI
+    canvasContainer.appendChild(displayCanvas);
+
+    // ✅ 5. Download link
     let fileName = `GPS_Photo_${imageCounter}.png`;
-
     const downloadLink = document.createElement("a");
-    downloadLink.href = imageData;
+    downloadLink.href = finalImageData;
     downloadLink.download = fileName;
     downloadLink.classList.add("downloadLink");
     downloadLink.textContent = `Download ${fileName}`;
+    canvasContainer.appendChild(downloadLink);
 
+    // ✅ 6. Checkbox logic (unchanged)
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.classList.add("checkbox");
     checkbox.id = `checkbox_${imageCounter}`;
     checkbox.value = imageCounter;
-    checkbox.style.display = "inline";
+    canvasContainer.appendChild(checkbox);
 
-checkbox.addEventListener('change', function () {
-  const selectedCount = uploadedImages.filter(img => img.checkbox.checked).length;
+    checkbox.addEventListener('change', function () {
+        const selectedCount = uploadedImages.filter(img => img.checkbox.checked).length;
+        const singleBtn = document.getElementById("uploadSingleBtn");
+        const mergeBtn = document.getElementById("mergeUploadBtn");
 
-  const singleBtn = document.getElementById("uploadSingleBtn");
-  const mergeBtn = document.getElementById("mergeUploadBtn");
+        if (selectedCount === 1) {
+            singleBtn.style.display = "inline-block";
+            mergeBtn.style.display = "none";
+        } else if (selectedCount > 1) {
+            singleBtn.style.display = "none";
+            mergeBtn.style.display = "inline-block";
+        } else {
+            singleBtn.style.display = "none";
+            mergeBtn.style.display = "none";
+        }
+    });
 
-  if (selectedCount === 1) {
-    singleBtn.style.display = "inline-block";
-    mergeBtn.style.display = "none";
-  } else if (selectedCount > 1) {
-    singleBtn.style.display = "none";
-    mergeBtn.style.display = "inline-block";
-  } else {
-    singleBtn.style.display = "none";
-    mergeBtn.style.display = "none";
-  }
-});
+    // ✅ 7. Add to uploadedImages array (unchanged)
+    uploadedImages.push({ imageData: finalImageData, fileName, checkbox });
 
-
-
-
-// ✅ Append elements to canvasContainer outside the event listener
-canvasContainer.appendChild(checkbox);
-canvasContainer.appendChild(downloadLink);
-
-    // Increment counter for next image
     imageCounter++;
 
-    // Call PDF function
-    generatePDF(imageData, exifDate, imageCounter);
-
-    // Add image data to the array
-    uploadedImages.push({ imageData, fileName, checkbox });
-
-    // Show merge to PDF button if 2 or more images are uploaded
-    if (uploadedImages.length > 1) {
-        document.getElementById("mergeToPDF").style.display = "block";
-    }
+    // ✅ 8. Generate PDF (unchanged)
+    generatePDF(finalImageData, exifDate);
+}
 
 
 }

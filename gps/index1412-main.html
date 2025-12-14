@@ -19,8 +19,7 @@
 	</script>
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2931901961774543" crossorigin="anonymous"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2931901961774543"
-    crossorigin="anonymous"></script>
+
 
   <meta name="google-adsense-account" content="ca-pub-2931901961774543">    
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -41,7 +40,15 @@
     }
   }
   </script>
- 
+ 	
+<!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-T4N9KCYHSF"></script>
+	<script>
+  	window.dataLayer = window.dataLayer || [];
+  	function gtag(){dataLayer.push(arguments);}
+  	gtag('js', new Date());
+  	gtag('config', 'G-T4N9KCYHSF');
+	</script>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -225,6 +232,19 @@
   <h1 style="margin-bottom: 10px; font-size: 2em; color: #222;">🧿 GPS CAMERA PRO</h1>
   <p style="font-size: 1.2em; color: #555; margin-bottom: 20px;"><em>No app download. Zero ads. Just clarity.</em></p>
 
+<!-- 🎥 GPS Camera Pro Demo Video -->
+<div style="margin: 30px 0;">
+  <h2 style="color: #333;">Watch GPS Camera Pro in Action</h2>
+  <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 10px;">
+    <iframe src="https://www.youtube.com/embed/0ydFGCbIeY8"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+            allowfullscreen></iframe>
+  </div>
+  <p style="margin-top: 15px; font-size: 16px; color: #555;">
+    No installation • No ads • Just clarity
+  </p>
+</div>
+
   <h2 style="color: #FF5733; margin-top: 30px;"><strong>📸 New Features Alert</strong></h2>
   <ul style="list-style: none; padding: 0; font-size: 1.1em; color: #333;">
     <li style="margin: 10px 0; color: #33C1FF;">✅ Capture multiple images in one go</li>
@@ -347,24 +367,24 @@
 
             console.log("Image selected:", file.name);
             const reader = new FileReader();
-            reader.onload = function (e) {
-                let uploadedImage = new Image();
-                uploadedImage.onload = function () {
-                    readEXIFGPS(file, function (exifDate) {
-                        drawImageWithOverlay(uploadedImage, exifDate);
-                    });
-                };
-                uploadedImage.src = e.target.result;
-            };
+reader.onload = function (e) {
+    let uploadedImage = new Image();
+    uploadedImage.onload = function () {
+        readEXIFGPS(file, function (exifDate, image) {
+            drawImageWithOverlay(image, exifDate);
+        }, uploadedImage); // Pass image explicitly
+    };
+    uploadedImage.src = e.target.result;
+};
             reader.readAsDataURL(file);
         });
 
-        function readEXIFGPS(file, callback) {
+function readEXIFGPS(file, callback, image) {
     let alreadyCalled = false;
     function safeCallback(date) {
         if (alreadyCalled) return;
         alreadyCalled = true;
-        callback(date);
+        callback(date, image);
     }
 
     EXIF.getData(file, function () {
@@ -386,11 +406,24 @@
             const latitude = convertToDecimal(lat, latRef);
             const longitude = convertToDecimal(lon, lonRef);
             gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-            fetchAddress(latitude, longitude, exifDate, safeCallback);
+            fetchAddress(latitude, longitude, exifDate, image, safeCallback);
         } else {
-            gpsCoordinates = "GPS not found!";
-            address = "Address not available";
-            safeCallback(exifDate);
+            // Fallback to browser geolocation
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const latitude = pos.coords.latitude;
+                    const longitude = pos.coords.longitude;
+                    gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                    fetchAddress(latitude, longitude, exifDate,image, safeCallback);
+                },
+                (err) => {
+                    console.error("Geolocation error:", err.message);
+                    gpsCoordinates = "GPS not found!";
+                    address = "Address not available";
+                    safeCallback(exifDate);
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
     });
 }
@@ -400,16 +433,16 @@
             return (ref === "S" || ref === "W") ? -decimal : decimal;
         }
 
-        function fetchAddress(lat, lon, exifDate, callback) {
+        function fetchAddress(lat, lon, exifDate, image, callback) {
             fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
                 .then(response => response.json())
                 .then(data => {
                     address = data.display_name || "Address not found";
-                    callback(exifDate); // Use extracted EXIF date
+                    callback(exifDate, image); // Use extracted EXIF date
                 })
                 .catch(() => {
                     address = "Failed to fetch address";
-                    callback(exifDate); // Ensure EXIF date is used even on failure
+                    callback(exifDate, image); // Ensure EXIF date is used even on failure
                 });
         }
 function drawImageWithOverlay(image, exifDate) {
@@ -482,9 +515,14 @@ checkbox.addEventListener('change', function () {
 });
 
 
+
+
 // ✅ Append elements to canvasContainer outside the event listener
 canvasContainer.appendChild(checkbox);
 canvasContainer.appendChild(downloadLink);
+
+    // Increment counter for next image
+    imageCounter++;
 
     // Call PDF function
     generatePDF(imageData, exifDate, imageCounter);
@@ -497,8 +535,7 @@ canvasContainer.appendChild(downloadLink);
         document.getElementById("mergeToPDF").style.display = "block";
     }
 
-    // Increment counter for next image
-    imageCounter++;
+
 }
 
 function splitText(ctx, text, maxWidth) {
@@ -518,49 +555,52 @@ function splitText(ctx, text, maxWidth) {
     return lines;
 }
 
-function generatePDF(imageData, exifDate, count) {
-    const { jsPDF } = window.jspdf;
+let pdfCounter = 1; // declare globally
 
-    const img = new Image();
-    img.src = imageData;
-    img.onload = function () {
-        const pdf = new jsPDF(); // Default A4 size
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
+function generatePDF(imageData, exifDate) {
+  const { jsPDF } = window.jspdf;
 
-        const imgRatio = img.width / img.height;
-        const pageRatio = pageWidth / pageHeight;
+  const img = new Image();
+  img.src = imageData;
+  img.onload = function () {
+    const pdf = new jsPDF(); // Default A4 size
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
 
-        let imgWidth, imgHeight;
+    const imgRatio = img.width / img.height;
+    const pageRatio = pageWidth / pageHeight;
 
-        if (imgRatio > pageRatio) {
-            imgWidth = pageWidth;
-            imgHeight = pageWidth / imgRatio;
-        } else {
-            imgHeight = pageHeight;
-            imgWidth = pageHeight * imgRatio;
-        }
+    let imgWidth, imgHeight;
+    if (imgRatio > pageRatio) {
+      imgWidth = pageWidth;
+      imgHeight = pageWidth / imgRatio;
+    } else {
+      imgHeight = pageHeight;
+      imgWidth = pageHeight * imgRatio;
+    }
 
-        const x = (pageWidth - imgWidth) / 2;
-        const y = (pageHeight - imgHeight) / 2;
+    const x = (pageWidth - imgWidth) / 2;
+    const y = (pageHeight - imgHeight) / 2;
 
-        pdf.addImage(img, "PNG", x, y, imgWidth, imgHeight); // Use PNG if imageData is PNG
+    pdf.addImage(img, "PNG", x, y, imgWidth, imgHeight);
 
-        const pdfFileName = `GPS_Photo_${count}.pdf`;
-        const pdfBlob = pdf.output("blob");
-        const pdfURL = URL.createObjectURL(pdfBlob);
+    const pdfFileName = `GPS_Photo_${pdfCounter}.pdf`; // use global counter
+    const pdfBlob = pdf.output("blob");
+    const pdfURL = URL.createObjectURL(pdfBlob);
 
-        const pdfDownloadLink = document.createElement("a");
-        pdfDownloadLink.href = pdfURL;
-        pdfDownloadLink.download = pdfFileName;
-        pdfDownloadLink.classList.add("downloadLink");
-        pdfDownloadLink.textContent = `Download ${pdfFileName}`;
-        document.getElementById("canvasContainer").appendChild(pdfDownloadLink);
+    const pdfDownloadLink = document.createElement("a");
+    pdfDownloadLink.href = pdfURL;
+    pdfDownloadLink.download = pdfFileName;
+    pdfDownloadLink.classList.add("downloadLink");
+    pdfDownloadLink.textContent = `Download ${pdfFileName}`;
+    document.getElementById("canvasContainer").appendChild(pdfDownloadLink);
 
-        console.log(`PDF created for ${pdfFileName}`);
-    };
-}
-function dataURItoBlob(dataURI) {
+    console.log(`PDF created for ${pdfFileName}`);
+
+    // increment AFTER saving
+    pdfCounter++;
+  };
+}function dataURItoBlob(dataURI) {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
 
@@ -774,68 +814,70 @@ function mergeSelectedImages() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
-  let loadCount = 0;
+  // Wrap each image load in a Promise
+  const promises = selectedImages.map((imgObj, index) => {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.src = imgObj.imageData;
 
-  selectedImages.forEach((imgObj, index) => {
-    const img = new Image();
-    img.src = imgObj.imageData;
+      img.onload = function () {
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
 
-    img.onload = function () {
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = img.width;
+        const imgHeight = img.height;
 
-      const imgWidth = img.width;
-      const imgHeight = img.height;
+        const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
+        const scaledWidth = imgWidth * scale;
+        const scaledHeight = imgHeight * scale;
 
-      const scale = Math.min(pageWidth / imgWidth, pageHeight / imgHeight);
-      const scaledWidth = imgWidth * scale;
-      const scaledHeight = imgHeight * scale;
+        const x = (pageWidth - scaledWidth) / 2;
+        const y = (pageHeight - scaledHeight) / 2;
 
-      const x = (pageWidth - scaledWidth) / 2;
-      const y = (pageHeight - scaledHeight) / 2;
+        pdf.addImage(img, "PNG", x, y, scaledWidth, scaledHeight);
 
-      pdf.addImage(img, "PNG", x, y, scaledWidth, scaledHeight);
-
-      if (index < selectedImages.length - 1) {
-        pdf.addPage();
-      }
-
-      loadCount++;
-      if (loadCount === selectedImages.length) {
-        const blob = pdf.output("blob");
-
-        const selector = document.getElementById("caseSelector");
-        const folderId = selector.value;
-        if (!folderId) {
-          alert("Please select a case before uploading.");
-          return;
+        if (index < selectedImages.length - 1) {
+          pdf.addPage();
         }
 
-        blobToBase64(blob).then(base64Data => {
-          fetch("/upload-pdf", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              folderId: folderId,
-              fileName: "Merged_Images.pdf",
-              base64: base64Data
-            })
-          })
-          .then(res => res.text())
-          .then(result => {
-            console.log("✅ Merged PDF uploaded:", result);
-            alert("✅ Merged PDF uploaded to Drive.");
-          })
-          .catch(err => {
-            console.error("❌ Upload failed:", err);
-            alert("❌ Upload failed. Please try again.");
-          });
+        resolve(); // mark this image as done
+      };
+    });
+  });
+
+  // Wait for all images to finish loading
+  Promise.all(promises).then(() => {
+    const blob = pdf.output("blob");
+
+    const selector = document.getElementById("caseSelector");
+    const folderId = selector.value;
+    if (!folderId) {
+      alert("Please select a case before uploading.");
+      return;
+    }
+
+    blobToBase64(blob).then(base64Data => {
+      fetch("/upload-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          folderId: folderId,
+          fileName: "Merged_Images.pdf",
+          base64: base64Data
+        })
+      })
+        .then(res => res.text())
+        .then(result => {
+          console.log("✅ Merged PDF uploaded:", result);
+          alert("✅ Merged PDF uploaded to Drive.");
+        })
+        .catch(err => {
+          console.error("❌ Upload failed:", err);
+          alert("❌ Upload failed. Please try again.");
         });
-      }
-    };
+    });
   });
 }
-
 </script>
 </section>
 <!-- END SECTION: GPS Camera Tool --><br>
