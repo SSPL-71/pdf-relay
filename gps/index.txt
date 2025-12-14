@@ -556,7 +556,6 @@ function drawImageWithOverlay(image, exifDate) {
 }
 
 
-}
 
 function splitText(ctx, text, maxWidth) {
     let words = text.split(" ");
