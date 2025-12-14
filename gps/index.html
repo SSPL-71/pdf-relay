@@ -525,6 +525,8 @@ function drawImageWithOverlay(image, exifDate) {
 
     // ✅ Export crisp PNG
     const finalImageData = finalCanvas.toDataURL("image/png");
+// ✅ Convert PNG → JPEG for PDF (much smaller)
+const jpegData = finalCanvas.toDataURL("image/jpeg", 0.7);
 
     // ✅ Display a normal‑resolution preview (not DPR)
     const previewCanvas = document.createElement("canvas");
@@ -571,12 +573,12 @@ function drawImageWithOverlay(image, exifDate) {
     });
 
     // ✅ 7. Add to uploadedImages array (unchanged)
-    uploadedImages.push({ imageData: finalImageData, fileName, checkbox });
+    uploadedImages.push({ imageData: jpegData, fileName, checkbox });
 
     imageCounter++;
 
     // ✅ 8. Generate PDF (unchanged)
-    generatePDF(finalImageData, exifDate);
+    generatePDF(jpegData, exifDate);
 }
 
 
@@ -604,7 +606,8 @@ function generatePDF(imageData, exifDate) {
   const { jsPDF } = window.jspdf;
 
   const img = new Image();
-  img.src = imageData.replace("image/png", "image/jpeg");
+  img.src = imageData;   // ✅ Already JPEG, no replace needed
+
   img.onload = function () {
     const pdf = new jsPDF(); // Default A4 size
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -625,12 +628,10 @@ function generatePDF(imageData, exifDate) {
     const x = (pageWidth - imgWidth) / 2;
     const y = (pageHeight - imgHeight) / 2;
 
-    // ✅ Convert PNG → JPEG before adding to PDF
-const jpegData = finalImageData.replace("image/png", "image/jpeg");
+    // ✅ Add JPEG directly
+    pdf.addImage(img, "JPEG", x, y, imgWidth, imgHeight);
 
-pdf.addImage(jpegData, "JPEG", x, y, imgWidth, imgHeight);
-
-    const pdfFileName = `GPS_Photo_${pdfCounter}.pdf`; // use global counter
+    const pdfFileName = `GPS_Photo_${pdfCounter}.pdf`;
     const pdfBlob = pdf.output("blob");
     const pdfURL = URL.createObjectURL(pdfBlob);
 
@@ -643,10 +644,11 @@ pdf.addImage(jpegData, "JPEG", x, y, imgWidth, imgHeight);
 
     console.log(`PDF created for ${pdfFileName}`);
 
-    // increment AFTER saving
     pdfCounter++;
   };
-}function dataURItoBlob(dataURI) {
+}
+
+    function dataURItoBlob(dataURI) {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
 
