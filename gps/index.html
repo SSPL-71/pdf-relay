@@ -494,29 +494,43 @@ function drawImageWithOverlay(image, exifDate) {
         });
     }
 
-   // ✅ 3. Create FINAL (screenshot-style) canvas at screen width
-const finalCanvas = document.createElement("canvas");
-const finalCtx = finalCanvas.getContext("2d");
+    // ✅ 3. Create FINAL (screenshot-style) canvas with high DPI support
+    const DPR = window.devicePixelRatio || 1;
 
-// Option D: match screen width
-const targetWidth = window.innerWidth;  
-const scale = targetWidth / fullCanvas.width;
+    // ✅ Force final width to 1000 px
+    const targetWidth = 1000;
 
-finalCanvas.width = targetWidth;
-finalCanvas.height = fullCanvas.height * scale;
+    // ✅ Scale height proportionally
+    const scale = targetWidth / fullCanvas.width;
+    const targetHeight = fullCanvas.height * scale;
 
-// ✅ Draw full-resolution canvas into smaller canvas (screenshot effect)
-finalCtx.drawImage(
-    fullCanvas,
-    0, 0, fullCanvas.width, fullCanvas.height,
-    0, 0, finalCanvas.width, finalCanvas.height
-);
+    // ✅ Create high‑DPI canvas
+    const finalCanvas = document.createElement("canvas");
+    finalCanvas.width = targetWidth * DPR;
+    finalCanvas.height = targetHeight * DPR;
 
-// ✅ Convert this smaller canvas to PNG (final image)
-const finalImageData = finalCanvas.toDataURL("image/png");
+    const finalCtx = finalCanvas.getContext("2d");
 
-// ✅ Display this smaller canvas in UI
-canvasContainer.appendChild(finalCanvas);
+    // ✅ Draw using DPR scaling (removes mobile blur)
+    finalCtx.scale(DPR, DPR);
+    finalCtx.drawImage(
+        fullCanvas,
+        0, 0, fullCanvas.width, fullCanvas.height,
+        0, 0, targetWidth, targetHeight
+    );
+
+    // ✅ Export crisp PNG
+    const finalImageData = finalCanvas.toDataURL("image/png");
+
+    // ✅ Display a normal‑resolution preview (not DPR)
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.width = targetWidth;
+    previewCanvas.height = targetHeight;
+
+    const previewCtx = previewCanvas.getContext("2d");
+    previewCtx.drawImage(finalCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+
+    canvasContainer.appendChild(previewCanvas);
 
     // ✅ 5. Download link
     let fileName = `GPS_Photo_${imageCounter}.png`;
