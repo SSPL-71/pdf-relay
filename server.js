@@ -63,6 +63,33 @@ app.post("/upload-pdf", async (req, res) => {
   }
 });
 
+app.post("/update-insured-statement", async (req, res) => {
+  try {
+
+    const { folderId, transcript } = req.body;
+
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "updateInsuredStmt",
+        folderId,
+        transcript
+      })
+    });
+
+    const result = await response.text();
+    res.send(result);
+
+  } catch (error) {
+    console.error("❌ Error updating insured statement:", error.message);
+    res.status(500).send("Failed to update insured statement");
+  }
+});
+
+
 // 🔹 GET: Fetch case folders from Apps Script
 app.get("/list-cases", async (req, res) => {
   try {
