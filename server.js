@@ -67,9 +67,14 @@ app.post("/upload-statement", async (req, res) => {
 
   try {
 
-    const { folderId, statement } = req.body;
+    console.log("Incoming statement upload:", req.body);
 
-    console.log("Statement received for folder:", folderId);
+    const folderId = req.body.folderId;
+    const statement = req.body.statement;
+
+    if (!folderId || !statement) {
+      return res.status(400).send("Missing folderId or statement");
+    }
 
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
@@ -84,6 +89,8 @@ app.post("/upload-statement", async (req, res) => {
     });
 
     const result = await response.text();
+
+    console.log("Apps Script response:", result);
 
     res.send(result);
 
