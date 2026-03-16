@@ -965,7 +965,7 @@ async function uploadInvestigationFiles(){
         return;
     }
 
-    const response = await fetch("/upload-statement",{
+    const response = await fetch("https://pdf-relay.onrender.com/upload-statement",{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
