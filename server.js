@@ -72,10 +72,6 @@ app.post("/upload-statement", async (req, res) => {
     const folderId = req.body.folderId;
     const statement = req.body.statement;
 
-    if (!folderId || !statement) {
-      return res.status(400).send("Missing folderId or statement");
-    }
-
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
       headers: {
