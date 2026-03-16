@@ -63,10 +63,13 @@ app.post("/upload-pdf", async (req, res) => {
   }
 });
 
-app.post("/update-insured-statement", async (req, res) => {
+app.post("/upload-statement", async (req, res) => {
+
   try {
 
-    const { folderId, transcript } = req.body;
+    const { folderId, statement } = req.body;
+
+    console.log("Statement received for folder:", folderId);
 
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
@@ -75,18 +78,23 @@ app.post("/update-insured-statement", async (req, res) => {
       },
       body: JSON.stringify({
         action: "updateInsuredStmt",
-        folderId,
-        transcript
+        folderId: folderId,
+        transcript: statement
       })
     });
 
     const result = await response.text();
+
     res.send(result);
 
   } catch (error) {
-    console.error("❌ Error updating insured statement:", error.message);
-    res.status(500).send("Failed to update insured statement");
+
+    console.error("Statement upload error:", error);
+
+    res.status(500).send("Upload failed");
+
   }
+
 });
 
 

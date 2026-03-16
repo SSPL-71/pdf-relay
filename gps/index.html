@@ -926,9 +926,90 @@ function mergeSelectedImages() {
     });
   });
 }
+
+async function uploadInvestigationFiles(){
+
+    const files = document.getElementById("investigationFiles").files;
+
+    if(files.length === 0){
+        alert("Please select transcript.txt and statement.txt");
+        return;
+    }
+
+    let transcriptText = "";
+    let statementText = "";
+
+    for(let file of files){
+
+        const text = await file.text();
+
+        if(file.name.toLowerCase().includes("transcript")){
+            transcriptText = text;
+        }
+
+        if(file.name.toLowerCase().includes("statement")){
+            statementText = text;
+        }
+
+    }
+
+    if(!statementText){
+        alert("statement.txt is required.");
+        return;
+    }
+
+    const folderId = document.getElementById("caseSelector").value;
+
+    if(!folderId){
+        alert("Please select a case first.");
+        return;
+    }
+
+    const response = await fetch("/upload-statement",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            folderId:folderId,
+            statement:statementText,
+            transcript:transcriptText
+        })
+    });
+
+    const result = await response.text();
+
+    alert(result);
+
+}
 </script>
 </section>
 <!-- END SECTION: GPS Camera Tool --><br>
+
+<!-- SECTION: Virtual Investigation Upload -->
+
+<div style="max-width:800px;margin:auto;background:white;padding:40px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.08);text-align:center;margin-top:30px;">
+
+<h2 style="color:#333;">🎥 Virtual Investigation</h2>
+
+<p style="color:#555;">
+Upload the generated <strong>transcript.txt</strong> and <strong>statement.txt</strong> files from the recorded interview.
+</p>
+
+<br>
+
+<input type="file" id="investigationFiles" multiple accept=".txt">
+
+<br><br>
+
+<button onclick="uploadInvestigationFiles()" 
+style="padding:10px 20px;background:#007bff;color:white;border:none;border-radius:6px;cursor:pointer;">
+Upload Transcript & Statement
+</button>
+
+</div>
+
+<!-- END SECTION -->
 
 
 
