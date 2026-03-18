@@ -70,7 +70,7 @@ app.post("/upload-statement", async (req, res) => {
     console.log("Incoming statement upload:", req.body);
 
     const folderId = req.body.folderId;
-    const transcript = req.body.transcript;
+    const statement = req.body.statement;
     
 
 
