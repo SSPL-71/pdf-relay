@@ -71,6 +71,8 @@ app.post("/upload-statement", async (req, res) => {
 
     const folderId = req.body.folderId;
     const statement = req.body.statement;
+    const role = req.body.role;
+
 
     const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: "POST",
@@ -80,7 +82,8 @@ app.post("/upload-statement", async (req, res) => {
       body: JSON.stringify({
         action: "updateInsuredStmt",
         folderId: folderId,
-        transcript: statement
+        transcript: statement,
+        role: role
       })
     });
 
