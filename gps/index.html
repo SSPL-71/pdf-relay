@@ -959,6 +959,12 @@ async function uploadInvestigationFiles(){
     }
 
     const folderId = document.getElementById("caseSelector").value;
+const role = document.getElementById("roleDropdown").value;
+
+if(!role){
+    alert("Please select a role first.");
+    return;
+}
 
     if(!folderId){
         alert("Please select a case first.");
@@ -970,11 +976,12 @@ async function uploadInvestigationFiles(){
         headers:{
             "Content-Type":"application/json"
         },
-        body:JSON.stringify({
-            folderId:folderId,
-            statement:statementText,
-            transcript:transcriptText
-        })
+body:JSON.stringify({
+    folderId:folderId,
+    statement:statementText,
+    transcript:transcriptText,
+    role:role
+})
     });
 
     const result = await response.text();
@@ -999,6 +1006,14 @@ Upload the generated <strong>transcript.txt</strong> and <strong>statement.txt</
 <br>
 
 <input type="file" id="investigationFiles" multiple accept=".txt">
+<br><br>
+
+<select id="roleDropdown" style="padding:10px; width:260px; border-radius:6px; border:1px solid #ccc;">
+  <option value="">Select Role</option>
+  <option value="insured">Insured</option>
+  <option value="driver">Driver</option>
+  <option value="occupant">Occupant</option>
+</select>
 
 <br><br>
 
