@@ -1,20 +1,22 @@
 {
   "name": "pdf-relay",
   "version": "1.0.0",
+  "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set NODE_NO_WARNINGS=1 && node server.js"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": "18.x"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^2.2.2",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "form-data": "^4.0.5",
-    "node-fetch": "^2.7.0"
-  },
-  "description": ""
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.0",
+    "node-fetch": "^2.6.7"
+  }
 }
