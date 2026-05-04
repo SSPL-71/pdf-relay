@@ -20,7 +20,34 @@
 
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2931901961774543" crossorigin="anonymous"></script>
 
+<script>
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
 
+if (token) {
+  window.GPS_TOKEN = token;
+
+  // ✅ NEW: auto-load cases when token exists
+  window.addEventListener("load", () => {
+    if (typeof window.loadCases === "function") {
+      window.loadCases();
+    }
+  });
+}
+</script>
+<script>
+window.addEventListener("load", () => {
+  const caseSection = document.getElementById("caseSection");
+
+  if (!window.GPS_TOKEN) {
+    // ❌ No token → hide case UI
+    caseSection.style.display = "none";
+  } else {
+    // ✅ Token present → show case UI
+    caseSection.style.display = "block";
+  }
+});
+</script>
   <meta name="google-adsense-account" content="ca-pub-2931901961774543">    
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="canonical" href="https://ss-services.co.in/gpstool">
@@ -41,14 +68,7 @@
   }
   </script>
  	
-<!-- Google tag (gtag.js) -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=G-T4N9KCYHSF"></script>
-	<script>
-  	window.dataLayer = window.dataLayer || [];
-  	function gtag(){dataLayer.push(arguments);}
-  	gtag('js', new Date());
-  	gtag('config', 'G-T4N9KCYHSF');
-	</script>
+
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
@@ -60,7 +80,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
- <script src="/access/login.js"></script>  
+   
 </head>
 
 <body>
@@ -74,12 +94,15 @@
       color: #333;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      padding: 20px 40px;
-      background-color: #e6f2ff;
-    }
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: #e6f2ff;
+  text-align: center;
+}
 
     .brand img {
       width: 60px;
@@ -100,7 +123,7 @@
     }
 
     .navigation {
-      text-align: left;
+      text-align: right;
       padding: 20px 40px;
     }
 
@@ -152,7 +175,7 @@
     <a href="https://ss-services.co.in" class="back-link">← Back to Main Page</a>
     <br>
   </div>
-</body>
+
 
 <!-- SECTION: GPS Camera Tool -->
 <section>
@@ -319,24 +342,17 @@
 <p><strong><i>*Note: Please enable Location Tag on your Camera to ensure GPS display</i></strong></p>
 
 
-<!-- 🔐 Login Gate -->
-<div style="margin-top: 30px; margin-bottom: 25px; padding: 20px; background-color: #f0f4f8; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-  <label for="loginInput" style="font-weight: 600; font-size: 1.1em; color: #333;">🔐 Enter Passphrase</label><br>
-  <input type="password" id="loginInput" placeholder="Your key of trust" style="width: 60%; padding: 10px; margin-top: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;" /><br>
-  <button onclick="attemptLogin()" style="background-color: #4a90e2; color: white; padding: 10px 20px; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; transition: background-color 0.3s ease;">
-    Login
-  </button>
-</div>
+
 
 <!-- 🔓 Case Selector (locked until login) -->
-<div style="margin-bottom: 25px; padding: 20px; width = 800px: background-color: #fefefe; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+<div id="caseSection" style="margin-bottom: 25px; padding: 20px; max-width: 800px; margin: auto; background-color: #fefefe; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
   <label for="caseSelector" style="font-weight: 600; font-size: 1.1em; color: #333;">📂 Select Case</label>
-  <select id="caseSelector" disabled style="width: 60%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;">
+  <select id="caseSelector" style="width: 60%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em;">
     <option value="">-- Choose a case --</option>
   </select>
 </div>
 
-<script src="/access/login.js"></script>
+
 
 <label for="cameraInput" class="camera-btn" style="display: inline-block; margin-bottom: 20px;">
   <img src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="Camera">
@@ -361,10 +377,73 @@
   <!-- GPS Camera JS -->
   <script>
         console.log("Page loaded and script running...");
+
+window.loadCases = async function () {
+  try {
+    
+
+const response = await fetch("https://gentrac.onrender.com/api/cases/my-assigned", {
+  headers: {
+    Authorization: `Bearer ${window.GPS_TOKEN}`
+  }
+});
+    const cases = await response.json();
+
+    const selector = document.getElementById("caseSelector");
+
+    selector.innerHTML = '<option value="">-- Choose a case --</option>';
+
+console.log("Folders response:", cases);
+if (!Array.isArray(cases)) {
+  console.error("Invalid cases response:", cases);
+  return;
+}
+    cases.forEach(c => {
+      const option = document.createElement("option");
+      option.value = c.id;
+      const insuredName =
+  c.intake_data?.insured_name ||
+  c.intake_data?.Insured_Name ||
+  "Case";
+
+option.textContent = `${c.serial_number} - ${insuredName}`;
+      selector.appendChild(option);
+    });
+
+    selector.disabled = false;
+
+  } catch (err) {
+    console.error("❌ Failed to load cases:", err);
+  }
+}
+
+
         let uploadedImages = [];
         let gpsCoordinates = "Fetching GPS...";
         let address = "Fetching Address...";
         let imageCounter = 1;
+let forcedGPS = null;
+let gpsReady = false;
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        forcedGPS = {
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude
+        };
+        gpsReady = true;
+        console.log("✅ Prefetched GPS:", forcedGPS);
+      },
+      (err) => {
+        console.warn("⚠️ GPS prefetch failed:", err.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, 1500);
+});
+
         document.getElementById("cameraInput").addEventListener("change", function (event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -413,6 +492,18 @@ function readEXIFGPS(file, callback, image) {
             fetchAddress(latitude, longitude, exifDate, image, safeCallback);
         } else {
             // Fallback to browser geolocation
+
+// ✅ Use prefetched GPS if available (safe override)
+if (gpsReady && forcedGPS) {
+    console.log("⚡ Using prefetched GPS");
+
+    const latitude = forcedGPS.lat;
+    const longitude = forcedGPS.lon;
+
+    gpsCoordinates = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+    fetchAddress(latitude, longitude, exifDate, image, safeCallback);
+    return;
+}
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const latitude = pos.coords.latitude;
@@ -674,6 +765,11 @@ function blobToBase64(blob) {
 }
 
 const fileCounters = {};
+
+// ⚠️ DEPRECATED - DO NOT USE
+// Replaced by mergeSelectedImages()
+// Safe to remove later
+
 function mergeToPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
@@ -738,8 +834,8 @@ function mergeToPDF() {
   Promise.all(imagePromises).then(() => {
     const pdfBlob = new Blob([pdf.output("arraybuffer")], { type: "application/pdf" });
 
-   const selector = document.getElementById("caseSelector");
-   const selectedFolderId = selector.value;
+const selector = document.getElementById("caseSelector");
+const caseId = selector.value;
    const rawName = selector.selectedOptions[0].textContent.trim();
    const normalized = rawName.replace(/–/g, "-").replace(/\s*-\s*/g, "-");
    const parts = normalized.split("-");
@@ -753,31 +849,29 @@ fileCounters[baseKey] = (fileCounters[baseKey] || 0) + 1;
 const suffix = fileCounters[baseKey] > 1 ? `-${fileCounters[baseKey] - 1}` : "";
 const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 
-    if (!selectedFolderId) {
-      alert("Please select a case before uploading.");
-      return;
-    }
 
     console.log("📄 PDF Blob size:", pdfBlob.size);
-    console.log("📁 Selected folder ID:", selectedFolderId);
+    
     console.log("📁 File name:", fileName);
 
-    blobToBase64(pdfBlob).then(base64Data => {
-      const payload = {
-        folderId: selectedFolderId,
-        fileName: fileName,
-        base64: base64Data
-      };
+
+
+blobToBase64(pdfBlob).then(base64Data => {
+  const payload = {
+    caseId: caseId,   // ✅ correct
+    fileName: fileName,
+    base64: base64Data
+  };
 
       console.log("📦 Base64 length:", base64Data.length);
-
-      fetch("/upload-pdf", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      })
+console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${window.GPS_TOKEN}`
+  },
+  body: formData
+})
         .then(response => response.text())
         .then(result => {
           console.log("✅ Upload success:", result);
@@ -795,8 +889,13 @@ const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 }
 
 function uploadSingleImage() {
-  console.log("🟢 uploadSingleImage triggered");
 
+if (!window.GPS_TOKEN) {
+  alert("⚠️ Please access this tool via GenTrac to upload files.");
+  return;
+}
+  console.log("🟢 uploadSingleImage triggered");
+console.log("UPLOAD FUNCTION TRIGGERED");
   const selected = uploadedImages.find(img => img.checkbox.checked);
   if (!selected) return;
 
@@ -823,37 +922,44 @@ function uploadSingleImage() {
     pdf.addImage(img, "JPEG", x, y, scaledWidth, scaledHeight);
     const blob = pdf.output("blob");
 
-    const selector = document.getElementById("caseSelector");
-    const folderId = selector.value;
-    if (!folderId) {
+const selector = document.getElementById("caseSelector");
+const caseId = selector.value;
+    if (!caseId) {
       alert("Please select a case before uploading.");
       return;
     }
 
-    blobToBase64(blob).then(base64Data => {
-      fetch("/upload-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          folderId: folderId,
-          fileName: selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"),
-          base64: base64Data
-        })
-      })
-      .then(res => res.text())
-      .then(result => {
-        console.log("✅ Single image uploaded:", result);
-        alert(`✅ ${selected.fileName} uploaded as PDF.`);
-      })
-      .catch(err => {
-        console.error("❌ Upload failed:", err);
-        alert("❌ Upload failed. Please try again.");
-      });
-    });
+const formData = new FormData();
+formData.append("file", blob);
+formData.append("fileName", selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"));
+
+console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+
+fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${window.GPS_TOKEN}`
+  },
+  body: formData
+})
+.then(res => res.text())
+.then(result => {
+  console.log("✅ Single image uploaded:", result);
+  alert(`✅ ${selected.fileName} uploaded as PDF.`);
+})
+.catch(err => {
+  console.error("❌ Upload failed:", err);
+  alert("❌ Upload failed. Please try again.");
+});
   };
 }
 
+
 function mergeSelectedImages() {
+if (!window.GPS_TOKEN) {
+  alert("⚠️ Please access this tool via GenTrac to upload files.");
+  return;
+}
   console.log("🟢 mergeSelectedImages triggered");
 
   const selectedImages = uploadedImages.filter(img => img.checkbox.checked);
@@ -862,7 +968,6 @@ function mergeSelectedImages() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
 
-  // Wrap each image load in a Promise
   const promises = selectedImages.map((imgObj, index) => {
     return new Promise(resolve => {
       const img = new Image();
@@ -888,106 +993,122 @@ function mergeSelectedImages() {
           pdf.addPage();
         }
 
-        resolve(); // mark this image as done
+        resolve();
       };
     });
   });
 
-  // Wait for all images to finish loading
   Promise.all(promises).then(() => {
     const blob = pdf.output("blob");
 
     const selector = document.getElementById("caseSelector");
-    const folderId = selector.value;
-    if (!folderId) {
+    const caseId = selector.value;
+
+    if (!caseId) {
       alert("Please select a case before uploading.");
       return;
     }
 
-    blobToBase64(blob).then(base64Data => {
-      fetch("/upload-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          folderId: folderId,
-          fileName: "Merged_Images.pdf",
-          base64: base64Data
-        })
-      })
-        .then(res => res.text())
-        .then(result => {
-          console.log("✅ Merged PDF uploaded:", result);
-          alert("✅ Merged PDF uploaded to Drive.");
-        })
-        .catch(err => {
-          console.error("❌ Upload failed:", err);
-          alert("❌ Upload failed. Please try again.");
-        });
-    });
+const formData = new FormData();
+formData.append("file", blob);
+formData.append("fileName", "Merged_Images.pdf");
+
+console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+
+fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
+  method: "POST",
+  headers: {
+    Authorization: `Bearer ${window.GPS_TOKEN}`
+  },
+  body: formData
+})
+.then(res => res.text())
+.then(result => {
+  console.log("✅ Merged PDF uploaded:", result);
+  alert("✅ Merged PDF uploaded to Drive.");
+})
+.catch(err => {
+  console.error("❌ Upload failed:", err);
+  alert("❌ Upload failed. Please try again.");
+});
   });
 }
 
-async function uploadInvestigationFiles(){
+async function uploadInvestigationFiles() {
 
-    const files = document.getElementById("investigationFiles").files;
+if (!window.GPS_TOKEN) {
+  alert("⚠️ Please access this tool via GenTrac to upload files.");
+  return;
+}
+  console.log("🟢 Upload Investigation triggered");
 
-    if(files.length === 0){
-        alert("Please select transcript.txt and statement.txt");
-        return;
+  const files = document.getElementById("investigationFiles").files;
+
+  if (files.length === 0) {
+    alert("Please select transcript.txt and statement.txt");
+    return;
+  }
+
+  let transcriptText = "";
+  let statementText = "";
+
+  for (let file of files) {
+    const text = await file.text();
+
+    if (file.name.toLowerCase().includes("transcript")) {
+      transcriptText = text;
     }
 
-    let transcriptText = "";
-    let statementText = "";
-
-    for(let file of files){
-
-        const text = await file.text();
-
-        if(file.name.toLowerCase().includes("transcript")){
-            transcriptText = text;
-        }
-
-        if(file.name.toLowerCase().includes("statement")){
-            statementText = text;
-        }
-
+    if (file.name.toLowerCase().includes("statement")) {
+      statementText = text;
     }
+  }
 
-    if(!statementText){
-        alert("statement.txt is required.");
-        return;
-    }
+  if (!statementText) {
+    alert("statement.txt is required.");
+    return;
+  }
 
-    const folderId = document.getElementById("caseSelector").value;
-const role = document.getElementById("roleDropdown").value;
+  const caseId = document.getElementById("caseSelector").value;
+  const role = document.getElementById("roleDropdown").value;
 
-if(!role){
+  if (!role) {
     alert("Please select a role first.");
     return;
-}
+  }
 
-    if(!folderId){
-        alert("Please select a case first.");
-        return;
-    }
+  if (!caseId) {
+    alert("Please select a case first.");
+    return;
+  }
 
-    const response = await fetch("https://pdf-relay.onrender.com/upload-statement",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-body:JSON.stringify({
-    folderId:folderId,
-    statement:statementText,
-    transcript:transcriptText,
-    role:role
-})
-    });
+  console.log("🟡 Before fetch");
 
-    const result = await response.text();
+const response = await fetch(
+  `https://gentrac.onrender.com/api/investigator-updates/statement/${caseId}`,
+  {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${window.GPS_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      statement: statementText,
+      transcript: transcriptText,
+      role: role
+    })
+  }
+);
 
-    alert(result);
+  const text = await response.text();
+  console.log("🔵 Server response:", text);
 
+  if (!response.ok) {
+    alert("❌ Upload failed");
+    return;
+  }
+
+  alert("✅ Upload successful");
 }
 </script>
 </section>
@@ -1025,7 +1146,7 @@ Upload Transcript & Statement !
 </div>
 
 <!-- END SECTION -->
-
+</section>
 
 
   <!-- Footer -->
