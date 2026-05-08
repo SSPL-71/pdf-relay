@@ -1035,14 +1035,6 @@ if (!window.GPS_TOKEN) {
       return;
     }
 
-const formData = new FormData();
-const namedFile = new File(
-  [blob],
-  mergedFileName,
-  { type: "application/pdf" }
-);
-
-formData.append("file", namedFile);
 const rawText = selector.selectedOptions[0].textContent.trim();
 
 const normalized = rawText
@@ -1061,6 +1053,15 @@ const insuredName = (parts[1] || "Unknown")
 const mergedFileName =
   `${serialNumber}_${insuredName}_Merged_${String(Date.now()).slice(-4)}.pdf`;
 
+const formData = new FormData();
+
+const namedFile = new File(
+  [blob],
+  mergedFileName,
+  { type: "application/pdf" }
+);
+
+formData.append("file", namedFile);
 formData.append("fileName", mergedFileName);
 
 
