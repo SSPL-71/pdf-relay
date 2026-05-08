@@ -950,7 +950,13 @@ const caseId = selector.value;
     }
 
 const formData = new FormData();
-formData.append("file", blob);
+const namedFile = new File(
+  [blob],
+  selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"),
+  { type: "application/pdf" }
+);
+
+formData.append("file", namedFile);
 formData.append("fileName", selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"));
 
 
@@ -1030,7 +1036,13 @@ if (!window.GPS_TOKEN) {
     }
 
 const formData = new FormData();
-formData.append("file", blob);
+const namedFile = new File(
+  [blob],
+  mergedFileName,
+  { type: "application/pdf" }
+);
+
+formData.append("file", namedFile);
 const rawText = selector.selectedOptions[0].textContent.trim();
 
 const normalized = rawText
