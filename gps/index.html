@@ -884,7 +884,7 @@ blobToBase64(pdfBlob).then(base64Data => {
   };
 
       console.log("📦 Base64 length:", base64Data.length);
-console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+
 fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
   method: "POST",
   headers: {
@@ -953,7 +953,7 @@ const formData = new FormData();
 formData.append("file", blob);
 formData.append("fileName", selected.fileName.replace(/\.(jpg|jpeg|png)$/i, ".pdf"));
 
-console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+
 
 fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
   method: "POST",
@@ -1031,9 +1031,27 @@ if (!window.GPS_TOKEN) {
 
 const formData = new FormData();
 formData.append("file", blob);
-formData.append("fileName", "Merged_Images.pdf");
+const rawText = selector.selectedOptions[0].textContent.trim();
 
-console.log("TOKEN BEING SENT:", window.GPS_TOKEN);
+const normalized = rawText
+  .replace(/–/g, "-")
+  .replace(/\s*-\s*/g, "-");
+
+const parts = normalized.split("-");
+
+const serialNumber = parts[0]?.trim() || "CASE";
+
+const insuredName = (parts[1] || "Unknown")
+  .trim()
+  .replace(/\s+/g, "_")
+  .replace(/[^a-zA-Z0-9_]/g, "");
+
+const mergedFileName =
+  `${serialNumber}_${insuredName}_Merged_${String(Date.now()).slice(-4)}.pdf`;
+
+formData.append("fileName", mergedFileName);
+
+
 
 fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
   method: "POST",
