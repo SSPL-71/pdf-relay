@@ -382,7 +382,16 @@ window.loadCases = async function () {
   try {
     
 
-const response = await fetch("https://gentrac.onrender.com/api/cases/my-assigned", {
+const tokenPayload = JSON.parse(
+  atob(window.GPS_TOKEN.split(".")[1])
+);
+
+const endpoint =
+  tokenPayload.role === "investigator"
+    ? "https://gentrac.onrender.com/api/cases/my-assigned"
+    : "https://gentrac.onrender.com/api/cases";
+
+const response = await fetch(endpoint, {
   headers: {
     Authorization: `Bearer ${window.GPS_TOKEN}`
   }
