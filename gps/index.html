@@ -630,7 +630,27 @@ const jpegData = finalCanvas.toDataURL("image/jpeg", 0.7);
     canvasContainer.appendChild(previewCanvas);
 
     // ✅ 5. Download link
-    let fileName = `GPS_Photo_${imageCounter}.png`;
+    const selector = document.getElementById("caseSelector");
+
+let fileName = `GPS_Photo_${imageCounter}.png`;
+
+if (selector && selector.selectedOptions.length > 0) {
+    const rawText = selector.selectedOptions[0].textContent.trim();
+
+    const normalized = rawText
+        .replace(/–/g, "-")
+        .replace(/\s*-\s*/g, "-");
+
+    const parts = normalized.split("-");
+
+    const serialNumber = parts[0]?.trim() || "CASE";
+    const insuredName = (parts[1] || "Unknown")
+        .trim()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "");
+
+    fileName = `${serialNumber}_${insuredName}_${String(imageCounter).padStart(2, "0")}.png`;
+}
     const downloadLink = document.createElement("a");
     downloadLink.href = finalImageData;
     downloadLink.download = fileName;
