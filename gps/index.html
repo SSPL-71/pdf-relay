@@ -407,7 +407,6 @@ const response = await fetch(endpoint, {
 
     selector.innerHTML = '<option value="">-- Choose a case --</option>';
 
-console.log("Folders response:", cases);
 if (!Array.isArray(cases)) {
   console.error("Invalid cases response:", cases);
   return;
@@ -431,7 +430,6 @@ option.textContent = `${c.serial_number} - ${insuredName}`;
   }
 }
 
-
         let uploadedImages = [];
         let gpsCoordinates = "Fetching GPS...";
         let address = "Fetching Address...";
@@ -448,7 +446,7 @@ window.addEventListener("load", () => {
           lon: pos.coords.longitude
         };
         gpsReady = true;
-        console.log("✅ Prefetched GPS:", forcedGPS);
+    
       },
       (err) => {
         console.warn("⚠️ GPS prefetch failed:", err.message);
@@ -462,7 +460,7 @@ window.addEventListener("load", () => {
             const file = event.target.files[0];
             if (!file) return;
 
-            console.log("Image selected:", file.name);
+           
             const reader = new FileReader();
 reader.onload = function (e) {
     let uploadedImage = new Image();
@@ -497,7 +495,7 @@ function readEXIFGPS(file, callback, image) {
             exifDate = new Date().toLocaleString();
         }
 
-        console.log("EXIF Date Extracted:", exifDate);
+       
 
         if (lat && lon) {
             const latitude = convertToDecimal(lat, latRef);
@@ -509,7 +507,7 @@ function readEXIFGPS(file, callback, image) {
 
 // ✅ Use prefetched GPS if available (safe override)
 if (gpsReady && forcedGPS) {
-    console.log("⚡ Using prefetched GPS");
+    
 
     const latitude = forcedGPS.lat;
     const longitude = forcedGPS.lon;
@@ -789,7 +787,7 @@ function generatePDF(imageData, exifDate) {
     pdfDownloadLink.textContent = `Download ${pdfFileName}`;
     document.getElementById("canvasContainer").appendChild(pdfDownloadLink);
 
-    console.log(`PDF created for ${pdfFileName}`);
+   
 
     pdfCounter++;
   };
@@ -906,9 +904,9 @@ const suffix = fileCounters[baseKey] > 1 ? `-${fileCounters[baseKey] - 1}` : "";
 const fileName = `${baseKey}_GPS_Report${suffix}.pdf`;
 
 
-    console.log("📄 PDF Blob size:", pdfBlob.size);
+   
     
-    console.log("📁 File name:", fileName);
+
 
 
 
@@ -919,7 +917,7 @@ blobToBase64(pdfBlob).then(base64Data => {
     base64: base64Data
   };
 
-      console.log("📦 Base64 length:", base64Data.length);
+      
 
 fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, {
   method: "POST",
@@ -930,7 +928,7 @@ fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, 
 })
         .then(response => response.text())
         .then(result => {
-          console.log("✅ Upload success:", result);
+          
           alert("✅ PDF uploaded successfully to Drive.");
         })
         .catch(error => {
@@ -950,8 +948,8 @@ if (!window.GPS_TOKEN) {
   alert("⚠️ Please access this tool via GenTrac to upload files.");
   return;
 }
-  console.log("🟢 uploadSingleImage triggered");
-console.log("UPLOAD FUNCTION TRIGGERED");
+
+
   const selected = uploadedImages.find(img => img.checkbox.checked);
   if (!selected) return;
 
@@ -1006,7 +1004,7 @@ fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, 
 })
 .then(res => res.text())
 .then(result => {
-  console.log("✅ Single image uploaded:", result);
+ 
   alert(`✅ ${selected.fileName} uploaded as PDF.`);
 })
 .catch(err => {
@@ -1022,7 +1020,7 @@ if (!window.GPS_TOKEN) {
   alert("⚠️ Please access this tool via GenTrac to upload files.");
   return;
 }
-  console.log("🟢 mergeSelectedImages triggered");
+ 
 
   const selectedImages = uploadedImages.filter(img => img.checkbox.checked);
   if (selectedImages.length < 2) return;
@@ -1111,7 +1109,7 @@ fetch(`https://gentrac.onrender.com/api/investigator-updates/upload/${caseId}`, 
 })
 .then(res => res.text())
 .then(result => {
-  console.log("✅ Merged PDF uploaded:", result);
+  
   alert("✅ Merged PDF uploaded to Drive.");
 })
 .catch(err => {
@@ -1127,7 +1125,7 @@ if (!window.GPS_TOKEN) {
   alert("⚠️ Please access this tool via GenTrac to upload files.");
   return;
 }
-  console.log("🟢 Upload Investigation triggered");
+ 
 
   const files = document.getElementById("investigationFiles").files;
 
@@ -1169,7 +1167,7 @@ if (!window.GPS_TOKEN) {
     return;
   }
 
-  console.log("🟡 Before fetch");
+ 
 
 const response = await fetch(
   `https://gentrac.onrender.com/api/investigator-updates/statement/${caseId}`,
@@ -1188,7 +1186,7 @@ const response = await fetch(
 );
 
   const text = await response.text();
-  console.log("🔵 Server response:", text);
+ 
 
   if (!response.ok) {
     alert("❌ Upload failed");
